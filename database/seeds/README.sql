@@ -1,0 +1,22 @@
+-- ================================================================
+-- DIGITALFASHION HUB — Seed Data Index
+-- ================================================================
+-- Seed files and ownership:
+--
+--   001_currencies_warehouses_tiers_seed.sql  — ABOSI BLESSING
+--       Currencies: USD, EUR, GBP, JPY, XAF, CAD, AUD, CHF, CNY, NGN, ZAR, MAD
+--       Warehouses: New York, Paris, Douala, Tokyo, Sydney
+--       Customer_Tiers: Standard (0), Premium (500), VIP (2000)
+--
+--   002_products_seed.sql                     — CHE BRIGHT
+--       20 sample products with variants and attributes
+--       Roles, Users (sellers + customers), Categories
+--
+--   003_customers_seed.sql                    — CHE BRIGHT
+--       10 sample customers across different tiers
+--
+--   004_coupons_seed.sql                      — ABOSI BLESSING
+--       5 coupon codes: 2 PERCENT + 3 FIXED, various validity windows
+--
+-- These files will be created in Week 3 (Milestone M2).
+-- ================================================================

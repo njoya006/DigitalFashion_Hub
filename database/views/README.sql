@@ -1,0 +1,25 @@
+-- ================================================================
+-- DIGITALFASHION HUB — View Placeholders
+-- ================================================================
+-- View files (owned by NJOYA MEDIN):
+--
+--   001_views.sql
+--
+--     CustomerTierOverview          — each customer with their tier, lifetime_value,
+--                                     loyalty_points, and days since registered
+--
+--     InventoryAlertView            — all inventory rows where quantity_on_hand
+--                                     is at or below reorder_threshold, joined
+--                                     with variant and warehouse info
+--
+--     OrderStatusDashboard          — per-status order counts and revenue totals
+--                                     broken down by currency
+--
+--   002_materialized_views.sql
+--
+--     ProductSalesSummary (MATERIALIZED) — per-product: total units sold,
+--                                          total revenue (USD), average rating,
+--                                          review count. Refresh hourly via Celery.
+--
+-- These files will be created in Week 3 (Milestone M2).
+-- ================================================================

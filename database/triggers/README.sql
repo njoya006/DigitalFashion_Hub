@@ -1,0 +1,18 @@
+-- ================================================================
+-- DIGITALFASHION HUB — Trigger Placeholders
+-- ================================================================
+-- Trigger files (owned by NJOYA MEDIN):
+--
+--   001_inventory_reorder.sql   — AFTER UPDATE on Inventory
+--                                 fires when quantity_on_hand < reorder_threshold
+--                                 inserts a row into Reorder_Requests automatically
+--
+--   002_tier_upgrade.sql        — AFTER UPDATE on Customers.lifetime_value
+--                                 promotes customer tier automatically:
+--                                 Standard → Premium → VIP
+--
+--   003_audit_log.sql           — AFTER INSERT/UPDATE/DELETE on Products, Orders, Inventory
+--                                 writes old/new JSONB snapshots into Audit_Log
+--
+-- These files will be created in Week 3 (Milestone M2).
+-- ================================================================
