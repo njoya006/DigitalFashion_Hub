@@ -1,0 +1,24 @@
+-- ================================================================
+-- DIGITALFASHION HUB — Stored Procedure Placeholders
+-- ================================================================
+-- Procedure files (owned by NJOYA MEDIN):
+--
+--   001_place_order.sql      — CALL place_order(customer_id, cart_id, currency_code, address_id, coupon_code)
+--                              Atomic transaction:
+--                              1. Lock inventory rows (SELECT FOR UPDATE)
+--                              2. Check stock for every cart item
+--                              3. Snapshot exchange rate
+--                              4. Apply tier discount + coupon
+--                              5. Deduct inventory
+--                              6. Create Order + Order_Items
+--                              7. Increment coupon used_count
+--                              8. Update customer lifetime_value
+--
+--   002_cancel_order.sql     — CALL cancel_order(order_id, reason)
+--                              Rolls back inventory, marks order CANCELLED, logs to Audit_Log
+--
+--   003_convert_price.sql    — FUNCTION convert_price(amount, from_currency, to_currency, at_date)
+--                              Returns DECIMAL — looks up nearest Exchange_Rate by effective_date
+--
+-- These files will be created in Week 3 (Milestone M2).
+-- ================================================================

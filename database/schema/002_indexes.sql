@@ -1,0 +1,13 @@
+-- ================================================================
+-- DIGITALFASHION HUB — Performance Indexes
+-- ICT 3212: Advanced Database Systems
+-- ================================================================
+-- All indexes are already included in 001_create_tables.sql.
+-- This file is reserved for any additional covering indexes or
+-- partial indexes added during performance tuning.
+-- ================================================================
+
+-- Example partial index (add as needed):
+-- CREATE INDEX idx_products_featured_published
+--     ON Products(category_id, base_price)
+--     WHERE is_published = TRUE AND is_featured = TRUE;
