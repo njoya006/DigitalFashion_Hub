@@ -1,0 +1,19 @@
+# ── Frontend ──────────────────────────────────────────────────
+Frontend/.next/
+Frontend/node_modules/
+Frontend/.env.local
+Frontend/tsconfig.tsbuildinfo
+
+# ── Backend ───────────────────────────────────────────────────
+Backend/venv/
+Backend/.env
+Backend/db.sqlite3
+Backend/media/
+Backend/staticfiles/
+Backend/__pycache__/
+Backend/**/__pycache__/
+Backend/**/*.pyc
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
