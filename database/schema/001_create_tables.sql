@@ -85,7 +85,7 @@ CREATE TABLE Customer_Tiers (
 CREATE TABLE Customers (
     customer_id        UUID          PRIMARY KEY REFERENCES Users(user_id) ON DELETE CASCADE,
     tier_id            INT           REFERENCES Customer_Tiers(tier_id) ON DELETE SET NULL,
-    phone              VARCHAR(20),
+    -- phone is on Users.phone — no duplication needed here
     preferred_currency CHAR(3)       REFERENCES Currencies(currency_code) ON DELETE SET NULL,
     loyalty_points     INT           DEFAULT 0    CHECK (loyalty_points >= 0),
     lifetime_value     DECIMAL(12,2) DEFAULT 0.00 CHECK (lifetime_value >= 0),
