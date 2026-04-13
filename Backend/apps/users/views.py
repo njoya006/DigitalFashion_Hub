@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema
 from django.conf import settings
 from django.core import signing
+from django.db import connection
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, Seller, User
+from .permissions import IsAdmin
 from .serializers import (
     ConfirmEmailVerificationSerializer,
     ConfirmPasswordResetSerializer,
@@ -243,3 +245,63 @@ class ConfirmEmailVerificationView(APIView):
             {"success": True, "message": "Email verified successfully. You can now sign in."},
             status=status.HTTP_200_OK,
         )
+
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def _fetch_scalar(self, sql):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+                row = cursor.fetchone()
+                return row[0] if row else 0
+        except Exception:
+            return 0
+
+    def _fetch_rows(self, sql):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+                columns = [col[0] for col in cursor.description]
+                return [dict(zip(columns, row)) for row in cursor.fetchall()]
+        except Exception:
+            return []
+
+    @extend_schema(summary="Admin dashboard analytics", tags=["Admin"])
+    def get(self, request):
+        total_users = self._fetch_scalar("SELECT COUNT(*) FROM users")
+        total_customers = self._fetch_scalar("SELECT COUNT(*) FROM customers")
+        total_sellers = self._fetch_scalar("SELECT COUNT(*) FROM sellers")
+        total_orders = self._fetch_scalar("SELECT COUNT(*) FROM orders")
+
+        revenue_rows = self._fetch_rows(
+            """
+            SELECT currency_code, COALESCE(SUM(total_amount), 0) AS revenue
+            FROM orders
+            GROUP BY currency_code
+            ORDER BY revenue DESC
+            """
+        )
+
+        top_products = self._fetch_rows(
+            """
+            SELECT p.product_name, COALESCE(SUM(oi.quantity), 0) AS units_sold
+            FROM order_items oi
+            JOIN products p ON p.product_id = oi.product_id
+            GROUP BY p.product_name
+            ORDER BY units_sold DESC
+            LIMIT 5
+            """
+        )
+
+        data = {
+            "total_users": total_users,
+            "total_customers": total_customers,
+            "total_sellers": total_sellers,
+            "total_orders": total_orders,
+            "revenue_by_currency": revenue_rows,
+            "top_products": top_products,
+        }
+
+        return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
