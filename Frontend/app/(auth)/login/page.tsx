@@ -6,6 +6,7 @@ import { FormEvent, useState } from "react"
 import type { CSSProperties } from "react"
 
 import api from "@/lib/api"
+import { setAuthSession } from "@/lib/auth"
 
 type LoginResponse = {
   success: boolean
@@ -36,6 +37,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  function isAllowedNextPath(role: LoginResponse["data"]["role"], nextPath: string) {
+    if (!nextPath.startsWith("/")) return false
+    if (nextPath.startsWith("/admin")) return role === "ADMIN"
+    if (nextPath.startsWith("/seller")) return role === "SELLER"
+    if (nextPath.startsWith("/customer")) return role === "CUSTOMER"
+    return true
+  }
+
+  function roleDefaultPath(role: LoginResponse["data"]["role"]) {
+    if (role === "ADMIN") return "/admin"
+    if (role === "SELLER") return "/seller"
+    if (role === "CUSTOMER") return "/customer"
+    return "/"
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError("")
@@ -47,20 +63,19 @@ export default function LoginPage() {
         password,
       })
 
-      localStorage.setItem("auth_token", res.data.access)
-      localStorage.setItem("refresh_token", res.data.refresh)
-      localStorage.setItem("user_role", res.data.role ?? "")
-      localStorage.setItem("user_email", res.data.email)
-      localStorage.setItem("user_name", res.data.full_name)
+      setAuthSession({
+        access: res.data.access,
+        refresh: res.data.refresh,
+        role: res.data.role ?? "",
+        email: res.data.email,
+        fullName: res.data.full_name,
+      })
 
-      if (res.data.role === "ADMIN") {
-        router.push("/admin")
-      } else if (res.data.role === "SELLER") {
-        router.push("/seller")
-      } else if (res.data.role === "CUSTOMER") {
-        router.push("/customer")
+      const nextPath = new URLSearchParams(window.location.search).get("next")
+      if (nextPath && isAllowedNextPath(res.data.role, nextPath)) {
+        router.push(nextPath)
       } else {
-        router.push("/")
+        router.push(roleDefaultPath(res.data.role))
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed. Try again.")

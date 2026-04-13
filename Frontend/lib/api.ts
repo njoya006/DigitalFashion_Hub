@@ -1,5 +1,6 @@
 // FILE: lib/api.ts
 // Base fetch API client for DigitalFashion Hub
+import { clearAuthSession } from '@/lib/auth'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1'
 
@@ -12,7 +13,7 @@ function getAuthHeaders(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token')
+      clearAuthSession()
       window.location.href = '/login'
     }
     throw new Error('Unauthorized')
