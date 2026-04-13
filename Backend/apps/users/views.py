@@ -10,9 +10,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, Seller, User
 from .serializers import (
+    ConfirmEmailVerificationSerializer,
     ConfirmPasswordResetSerializer,
     CustomTokenObtainPairSerializer,
     CustomerProfileSerializer,
+    RequestEmailVerificationSerializer,
     RequestPasswordResetSerializer,
     RegisterSerializer,
     SellerProfileSerializer,
@@ -44,18 +46,27 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response(
-            {
-                "success": True,
-                "message": "Account created successfully. Please verify your email.",
-                "data": {
-                    "user_id": str(user.user_id),
-                    "email": user.email,
-                    "full_name": user.full_name,
-                },
+
+        response_data = {
+            "success": True,
+            "message": "Account created successfully. Please verify your email.",
+            "data": {
+                "user_id": str(user.user_id),
+                "email": user.email,
+                "full_name": user.full_name,
             },
-            status=status.HTTP_201_CREATED,
-        )
+        }
+
+        if settings.DEBUG:
+            verification_token = signing.dumps(
+                {"user_id": str(user.user_id), "email": user.email},
+                salt="email-verification",
+            )
+            frontend_base = getattr(settings, "FRONTEND_URL", "http://localhost:3000").rstrip("/")
+            response_data["data"]["verification_token"] = verification_token
+            response_data["data"]["verification_url"] = f"{frontend_base}/verify-email?token={verification_token}"
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class LogoutView(APIView):
@@ -174,5 +185,61 @@ class ConfirmPasswordResetView(APIView):
 
         return Response(
             {"success": True, "message": "Password reset successful. You can now sign in."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class RequestEmailVerificationView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Request email verification", tags=["Authentication"])
+    def post(self, request):
+        serializer = RequestEmailVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user = User.objects.filter(email=email, is_active=True).first()
+
+        response_data = {
+            "success": True,
+            "message": "If this email exists, verification instructions have been sent.",
+        }
+
+        if user and not user.is_verified:
+            verification_token = signing.dumps(
+                {"user_id": str(user.user_id), "email": user.email},
+                salt="email-verification",
+            )
+            frontend_base = getattr(settings, "FRONTEND_URL", "http://localhost:3000").rstrip("/")
+            if settings.DEBUG:
+                response_data["data"] = {
+                    "verification_token": verification_token,
+                    "verification_url": f"{frontend_base}/verify-email?token={verification_token}",
+                }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ConfirmEmailVerificationView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Confirm email verification", tags=["Authentication"])
+    def post(self, request):
+        serializer = ConfirmEmailVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        max_age_seconds = getattr(settings, "EMAIL_VERIFICATION_TOKEN_TTL", 86400)
+        user = serializer.get_user_from_token(max_age_seconds=max_age_seconds)
+
+        if user.is_verified:
+            return Response(
+                {"success": True, "message": "Email is already verified."},
+                status=status.HTTP_200_OK,
+            )
+
+        User.objects.filter(user_id=user.user_id).update(is_verified=True)
+
+        return Response(
+            {"success": True, "message": "Email verified successfully. You can now sign in."},
             status=status.HTTP_200_OK,
         )

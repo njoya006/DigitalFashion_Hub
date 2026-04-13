@@ -198,3 +198,28 @@ class ConfirmPasswordResetSerializer(serializers.Serializer):
             raise serializers.ValidationError({"token": "Reset token has expired."}) from exc
         except (signing.BadSignature, User.DoesNotExist) as exc:
             raise serializers.ValidationError({"token": "Invalid reset token."}) from exc
+
+
+class RequestEmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.lower().strip()
+
+
+class ConfirmEmailVerificationSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+    def get_user_from_token(self, max_age_seconds=86400):
+        token = self.validated_data["token"]
+        try:
+            payload = signing.loads(token, salt="email-verification", max_age=max_age_seconds)
+            user_id = payload.get("user_id")
+            email = payload.get("email")
+            if not user_id or not email:
+                raise serializers.ValidationError({"token": "Invalid verification token."})
+            return User.objects.get(user_id=user_id, email=email, is_active=True)
+        except signing.SignatureExpired as exc:
+            raise serializers.ValidationError({"token": "Verification token has expired."}) from exc
+        except (signing.BadSignature, User.DoesNotExist) as exc:
+            raise serializers.ValidationError({"token": "Invalid verification token."}) from exc

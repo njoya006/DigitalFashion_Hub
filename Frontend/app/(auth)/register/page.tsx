@@ -60,7 +60,7 @@ export default function RegisterPage() {
         confirm_password: confirmPassword,
       })
 
-      setSuccess(res.message || "Account created successfully.")
+      setSuccess(res.message || "Account created successfully. Please verify your email.")
       setTimeout(() => {
         router.push("/login")
       }, 1000)
@@ -172,6 +172,11 @@ export default function RegisterPage() {
           <Link href="/login" style={{ color: "var(--gold)", fontSize: 13 }}>
             Already have an account? Sign in
           </Link>
+          <div style={{ marginTop: 8 }}>
+            <Link href="/verify-email" style={{ color: "var(--muted)", fontSize: 13 }}>
+              Verify your email
+            </Link>
+          </div>
         </div>
       </section>
     </main>
