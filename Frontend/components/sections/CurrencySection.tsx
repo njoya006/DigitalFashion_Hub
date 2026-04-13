@@ -3,6 +3,7 @@
 
 import Link from 'next/link'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
+import { useCurrency } from '@/components/providers/CurrencyProvider'
 
 const rates = [
   { code: 'USD', name: 'US Dollar', rate: '1.00', change: 'Base', trend: 'neutral' as const },
@@ -32,6 +33,7 @@ function TrendArrow({ trend }: { trend: 'up' | 'down' | 'neutral' }) {
 export default function CurrencySection() {
   const leftRef = useScrollReveal(0.1)
   const rightRef = useScrollReveal(0.1, 150)
+  const { currency } = useCurrency()
 
   return (
     <section style={{ padding: '100px 60px', backgroundColor: 'var(--black)' }}>
@@ -53,6 +55,24 @@ export default function CurrencySection() {
             DigitalFashion Hub supports live exchange rates across 12 global currencies.
             No hidden fees — the price you see is the price you pay, always updated in real time.
           </p>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 24,
+              padding: '8px 12px',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--white)',
+              fontFamily: 'var(--font-dm)',
+              fontSize: 11,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Active currency: <span style={{ color: 'var(--gold)' }}>{currency}</span>
+          </div>
           <Link href="/products" className="btn-ghost">
             Start Shopping
           </Link>

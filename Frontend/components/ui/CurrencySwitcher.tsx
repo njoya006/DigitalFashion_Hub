@@ -1,34 +1,49 @@
-'use client'
-// FILE: components/ui/CurrencySwitcher.tsx
+"use client"
 
-import { useState } from 'react'
-
-const CURRENCIES = ['🌍 USD', '🌍 EUR', '🌍 GBP', '🌍 JPY', '🌍 XAF']
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 export default function CurrencySwitcher() {
-  const [index, setIndex] = useState(0)
-
-  const cycle = () => setIndex((prev) => (prev + 1) % CURRENCIES.length)
+  const { currency, setCurrency, currencies } = useCurrency()
 
   return (
-    <button
-      onClick={cycle}
+    <label
       style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
         fontSize: 10,
-        color: 'var(--gold)',
-        border: '1px solid var(--gold-dim)',
-        padding: '5px 12px',
-        background: 'transparent',
-        letterSpacing: '0.08em',
-        cursor: 'none',
-        borderRadius: 'var(--radius)',
-        fontFamily: 'var(--font-dm)',
-        transition: 'border-color 0.2s ease, color 0.2s ease',
-        whiteSpace: 'nowrap',
+        color: "var(--gold)",
+        border: "1px solid var(--gold-dim)",
+        padding: "5px 12px",
+        background: "transparent",
+        letterSpacing: "0.08em",
+        borderRadius: "var(--radius)",
+        fontFamily: "var(--font-dm)",
+        whiteSpace: "nowrap",
       }}
-      aria-label="Switch currency"
     >
-      {CURRENCIES[index]}
-    </button>
+      <span style={{ color: "var(--muted)" }}>Currency</span>
+      <select
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value as (typeof currencies)[number])}
+        aria-label="Switch currency"
+        style={{
+          border: "none",
+          background: "transparent",
+          color: "var(--gold)",
+          fontFamily: "var(--font-dm)",
+          fontSize: 10,
+          letterSpacing: "0.08em",
+          outline: "none",
+          cursor: "pointer",
+        }}
+      >
+        {currencies.map((item) => (
+          <option key={item} value={item} style={{ color: "#000000" }}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
