@@ -1,4 +1,6 @@
 from drf_spectacular.utils import extend_schema
+from django.conf import settings
+from django.core import signing
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -8,12 +10,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Customer, Seller, User
 from .serializers import (
+    ConfirmPasswordResetSerializer,
     CustomTokenObtainPairSerializer,
     CustomerProfileSerializer,
+    RequestPasswordResetSerializer,
     RegisterSerializer,
     SellerProfileSerializer,
     UserProfileSerializer,
 )
+from .utils import hash_password
 
 
 class LoginView(TokenObtainPairView):
@@ -120,3 +125,54 @@ class RefreshTokenView(APIView):
             return Response({"success": True, "data": {"access": str(refresh.access_token)}}, status=status.HTTP_200_OK)
         except Exception as exc:
             return Response({"success": False, "error": str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class RequestPasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Request password reset", tags=["Authentication"])
+    def post(self, request):
+        serializer = RequestPasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+        user = User.objects.filter(email=email, is_active=True).first()
+
+        # Always return success to avoid user enumeration.
+        response_data = {
+            "success": True,
+            "message": "If this email exists, password reset instructions have been sent.",
+        }
+
+        if user:
+            token = signing.dumps({"user_id": str(user.user_id), "email": user.email}, salt="password-reset")
+            frontend_base = getattr(settings, "FRONTEND_URL", "http://localhost:3000").rstrip("/")
+            reset_url = f"{frontend_base}/reset-password?token={token}"
+
+            # Email sending is not configured yet; provide debug token/url in development.
+            if settings.DEBUG:
+                response_data["data"] = {
+                    "reset_token": token,
+                    "reset_url": reset_url,
+                }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ConfirmPasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Confirm password reset", tags=["Authentication"])
+    def post(self, request):
+        serializer = ConfirmPasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        max_age_seconds = getattr(settings, "PASSWORD_RESET_TOKEN_TTL", 3600)
+        user = serializer.get_user_from_token(max_age_seconds=max_age_seconds)
+
+        User.objects.filter(user_id=user.user_id).update(password_hash=hash_password(serializer.validated_data["new_password"]))
+
+        return Response(
+            {"success": True, "message": "Password reset successful. You can now sign in."},
+            status=status.HTTP_200_OK,
+        )

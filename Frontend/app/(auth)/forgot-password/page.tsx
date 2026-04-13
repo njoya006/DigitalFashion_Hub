@@ -2,17 +2,30 @@
 
 import Link from "next/link"
 import { FormEvent, useState } from "react"
+import api from "@/lib/api"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    // Backend reset endpoint is not part of Prompt 1 yet.
-    setMessage(
-      "Password reset API will be connected in Prompt 2. For now, use seeded credentials or register a new account."
-    )
+    setMessage("")
+    setError("")
+    setIsSubmitting(true)
+
+    try {
+      const res = await api.post<{ message?: string }>("/auth/request-reset/", { email })
+      setMessage(res?.message ?? "If this email exists, password reset instructions have been sent.")
+      setEmail("")
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unable to request password reset."
+      setError(msg)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -68,12 +81,18 @@ export default function ForgotPasswordPage() {
             }}
           />
 
-          <button type="submit" className="btn-primary" style={{ justifyContent: "center", marginTop: 4 }}>
-            Send Reset Instructions
+          <button
+            type="submit"
+            className="btn-primary"
+            style={{ justifyContent: "center", marginTop: 4 }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Sending..." : "Send Reset Instructions"}
           </button>
         </form>
 
         {message ? <p style={{ marginTop: 12, color: "var(--muted)", fontSize: 13 }}>{message}</p> : null}
+        {error ? <p style={{ marginTop: 12, color: "#ff8a8a", fontSize: 13 }}>{error}</p> : null}
 
         <div style={{ marginTop: 14 }}>
           <Link href="/login" style={{ color: "var(--gold)", fontSize: 13 }}>

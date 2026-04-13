@@ -145,3 +145,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
+
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+PASSWORD_RESET_TOKEN_TTL = config("PASSWORD_RESET_TOKEN_TTL", default=3600, cast=int)
