@@ -115,36 +115,36 @@ Observability         → Audit_Log
 NJOYA carries the database foundation and the most complex backend logic. As team lead, he also reviews and integrates everyone else's work.
 
 #### Database (owns entire schema)
-- [ ] Design and implement the full PostgreSQL schema — all 28 tables, complete DDL scripts
-- [ ] Write all `CREATE INDEX` statements (FKs, email, slug, status, effective_date)
-- [ ] Implement the **auto-reorder trigger** on `Inventory` (AFTER UPDATE, when qty < threshold)
-- [ ] Implement the **tier-upgrade trigger** on `Customers.lifetime_value` (auto-promotes Standard → Premium → VIP)
-- [ ] Implement the **audit logging trigger** for `Products`, `Orders`, `Inventory` tables
-- [ ] Write stored procedure: `place_order()` — full atomic transaction (check stock → deduct → apply discount → snapshot exchange rate → create order)
-- [ ] Write stored procedure: `cancel_order()` — with full inventory rollback
-- [ ] Write stored procedure: `convert_price(amount, from, to, date)`
-- [ ] Create materialized view: `ProductSalesSummary`
-- [ ] Create view: `CustomerTierOverview`, `InventoryAlertView`, `OrderStatusDashboard`
-- [ ] Write all seed data (currencies, tiers, warehouses, categories, sample products)
+- [x] Design and implement the full PostgreSQL schema — all 28 tables, complete DDL scripts
+- [x] Write all `CREATE INDEX` statements (FKs, email, slug, status, effective_date)
+- [x] Implement the **auto-reorder trigger** on `Inventory` (AFTER UPDATE, when qty < threshold)
+- [x] Implement the **tier-upgrade trigger** on `Customers.lifetime_value` (auto-promotes Standard → Premium → VIP)
+- [x] Implement the **audit logging trigger** for `Products`, `Orders`, `Inventory` tables
+- [x] Write stored procedure: `place_order()` — full atomic transaction (check stock → deduct → apply discount → snapshot exchange rate → create order)
+- [x] Write stored procedure: `cancel_order()` — with full inventory rollback
+- [x] Write stored procedure: `convert_price(amount, from, to, date)`
+- [x] Create materialized view: `ProductSalesSummary`
+- [x] Create view: `CustomerTierOverview`, `InventoryAlertView`, `OrderStatusDashboard`
+- [x] Write all seed data (currencies, tiers, warehouses, categories, sample products)
 
 #### Backend (Django)
-- [ ] Set up Django project, PostgreSQL connection, environment config
-- [ ] Implement JWT authentication (register, login, refresh, logout)
-- [ ] Build `Users`, `Roles`, `Customers`, `Sellers` models, serializers, and views
-- [ ] Implement role-based permission classes (`IsAdmin`, `IsSeller`, `IsCustomer`)
-- [ ] Build `Orders` API — calls `place_order()` stored procedure
-- [ ] Build `Payments` handler (Stripe / MTN MoMo webhook integration)
-- [ ] Build Admin analytics API (revenue by currency, top products, user growth)
-- [ ] Set up Celery + scheduled task for hourly exchange rate refresh (OpenExchangeRates API)
+- [x] Set up Django project, PostgreSQL connection, environment config
+- [x] Implement JWT authentication (register, login, refresh, logout)
+- [x] Build `Users`, `Roles`, `Customers`, `Sellers` models, serializers, and views
+- [x] Implement role-based permission classes (`IsAdmin`, `IsSeller`, `IsCustomer`)
+- [x] Build `Orders` API — calls `place_order()` stored procedure
+- [x] Build `Payments` handler (webhook simulation endpoint in Orders API)
+- [x] Build Admin analytics API (revenue by currency, top products, user growth)
+- [x] Set up Celery + scheduled task for hourly exchange rate refresh (OpenExchangeRates API)
 
 #### Frontend (Next.js)
-- [ ] Project setup (Next.js 15 App Router, Tailwind CSS, Google Fonts)
-- [ ] Homepage (`app/page.tsx`) — full luxury dark UI
-- [ ] Authentication pages (Login, Register, Email Verification)
-- [ ] Protected route middleware and role-based routing
-- [ ] Admin Dashboard — full panel (users, sellers, inventory, revenue charts)
-- [ ] Currency switcher component (global state, persisted)
-- [ ] CI/CD pipeline (GitHub Actions → Vercel + Railway)
+- [x] Project setup (Next.js 15 App Router, Tailwind CSS, Google Fonts)
+- [x] Homepage (`app/page.tsx`) — full luxury dark UI
+- [x] Authentication pages (Login, Register, Email Verification)
+- [x] Protected route middleware and role-based routing
+- [x] Admin Dashboard — full panel (users, sellers, inventory, revenue charts)
+- [x] Currency switcher component (global state, persisted)
+- [x] CI/CD pipeline (GitHub Actions → Vercel + Railway)
 
 **Files owned:**
 ```
