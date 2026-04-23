@@ -33,7 +33,26 @@ async function proxy(request: NextRequest, pathParts: string[]) {
     init.body = await request.text()
   }
 
-  const response = await fetch(backendUrl.toString(), init)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 12000)
+  let response: Response
+
+  try {
+    response = await fetch(backendUrl.toString(), {
+      ...init,
+      signal: controller.signal,
+    })
+  } catch {
+    return Response.json(
+      {
+        success: false,
+        message: 'Backend API is unreachable. Check BACKEND_API_URL in Vercel environment variables.',
+      },
+      { status: 502 },
+    )
+  } finally {
+    clearTimeout(timeout)
+  }
   const responseHeaders = new Headers()
   response.headers.forEach((value, key) => {
     if (!STRIPPED_HEADERS.has(key.toLowerCase())) {

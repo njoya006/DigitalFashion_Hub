@@ -20,7 +20,13 @@ async function handleResponse<T>(res: Response): Promise<T> {
   }
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }))
-    throw new Error(error?.message ?? `HTTP ${res.status}`)
+    const message =
+      error?.message ||
+      error?.error ||
+      error?.detail ||
+      (typeof error?.details === 'object' ? JSON.stringify(error.details) : '') ||
+      `HTTP ${res.status}`
+    throw new Error(message)
   }
   return res.json() as Promise<T>
 }
