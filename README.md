@@ -350,6 +350,8 @@ npm run dev
 
 App: `http://localhost:3000` | API: `http://localhost:8000/api/`
 
+For Vercel deployments, set `BACKEND_API_URL` in the project environment variables to the public Django API URL. The frontend now proxies `/api/v1/*` through its own origin, so the browser never calls `localhost` directly in production.
+
 ---
 
 ## Project Structure
@@ -457,6 +459,14 @@ Full Swagger docs at: `http://localhost:8000/api/docs/`
 | Redis (Celery) | **Upstash** | ✅ Free tier | NJOYA |
 | Media Storage | **Cloudinary** | ✅ Free tier | NJOYA |
 | Exchange Rates | **Open Exchange Rates API** | ✅ Free tier | NJOYA |
+
+### Vercel Environment Variables
+
+Set these in the Vercel project settings:
+
+| Key | Value |
+|---|---|
+| `BACKEND_API_URL` | Public Django API base URL, for example `https://your-api-domain.com` |
 
 ---
 
