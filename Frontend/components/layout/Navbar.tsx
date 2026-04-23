@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import CurrencySwitcher from '@/components/ui/CurrencySwitcher'
+import { clearAuthSession } from '@/lib/auth'
 
 const NAV_LINKS = [
   { href: '/products?filter=new', label: 'New Arrivals' },
@@ -15,12 +16,32 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userRole, setUserRole] = useState('')
+
+  function getAccountPath() {
+    if (userRole === 'ADMIN') return '/admin'
+    if (userRole === 'SELLER') return '/seller'
+    if (userRole === 'CUSTOMER') return '/customer'
+    return '/login'
+  }
+
+  function handleLogout() {
+    clearAuthSession()
+    window.location.href = '/login'
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token')
+    const role = localStorage.getItem('user_role') ?? ''
+    setIsAuthenticated(Boolean(token))
+    setUserRole(role)
   }, [])
 
   return (
@@ -104,7 +125,7 @@ export default function Navbar() {
         </Link>
 
         {/* User icon */}
-        <Link href="/customer" aria-label="Account" style={{ color: 'var(--muted)', transition: 'color 0.2s ease' }}
+        <Link href={getAccountPath()} aria-label="Account" style={{ color: 'var(--muted)', transition: 'color 0.2s ease' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--white)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
         >
@@ -145,6 +166,38 @@ export default function Navbar() {
             3
           </span>
         </Link>
+
+        {isAuthenticated ? (
+          <button
+            onClick={handleLogout}
+            style={{
+              color: 'var(--muted)',
+              background: 'transparent',
+              border: 'none',
+              fontSize: 11,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-dm)',
+            }}
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            style={{
+              color: 'var(--muted)',
+              fontSize: 11,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-dm)',
+            }}
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </header>
   )

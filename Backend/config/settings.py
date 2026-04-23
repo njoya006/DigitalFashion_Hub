@@ -145,3 +145,21 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
+
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+PASSWORD_RESET_TOKEN_TTL = config("PASSWORD_RESET_TOKEN_TTL", default=3600, cast=int)
+EMAIL_VERIFICATION_TOKEN_TTL = config("EMAIL_VERIFICATION_TOKEN_TTL", default=86400, cast=int)
+
+OPENEXCHANGE_APP_ID = config("OPENEXCHANGE_APP_ID", default="")
+EXCHANGE_BASE_CURRENCY = config("EXCHANGE_BASE_CURRENCY", default="USD")
+EXCHANGE_REFRESH_TIMEOUT = config("EXCHANGE_REFRESH_TIMEOUT", default=15, cast=int)
+
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default=CELERY_BROKER_URL)
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "refresh-exchange-rates-hourly": {
+        "task": "tasks.refresh_exchange_rates",
+        "schedule": 60 * 60,
+    }
+}

@@ -1,7 +1,8 @@
 // FILE: lib/api.ts
 // Base fetch API client for DigitalFashion Hub
+import { clearAuthSession } from '@/lib/auth'
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1'
+const BASE_PATH = '/api/v1'
 
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === 'undefined') return {}
@@ -12,7 +13,7 @@ function getAuthHeaders(): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (res.status === 401) {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token')
+      clearAuthSession()
       window.location.href = '/login'
     }
     throw new Error('Unauthorized')
@@ -25,7 +26,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function get<T>(path: string, params?: Record<string, string>): Promise<T> {
-  const url = new URL(`${BASE_URL}${path}`)
+  const url = new URL(`${BASE_PATH}${path}`, typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
   }
@@ -41,7 +42,7 @@ export async function get<T>(path: string, params?: Record<string, string>): Pro
 }
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_PATH}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function put<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_PATH}${path}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -65,7 +66,7 @@ export async function put<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function del<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${BASE_PATH}${path}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

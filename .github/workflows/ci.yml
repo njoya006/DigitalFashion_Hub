@@ -1,0 +1,58 @@
+name: DigitalFashion CI
+
+on:
+  push:
+    branches: [main, njoya]
+  pull_request:
+    branches: [main, njoya]
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile Python files
+        run: python -m compileall -q .
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build

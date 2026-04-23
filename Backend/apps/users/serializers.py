@@ -1,5 +1,6 @@
 import uuid
 from django.db import transaction
+from django.core import signing
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -165,3 +166,60 @@ class SellerProfileSerializer(serializers.ModelSerializer):
             "total_sales",
         ]
         read_only_fields = ["seller_id", "commission_rate", "is_approved", "rating", "total_sales"]
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.lower().strip()
+
+
+class ConfirmPasswordResetSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
+    confirm_password = serializers.CharField(min_length=8, write_only=True)
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return attrs
+
+    def get_user_from_token(self, max_age_seconds=3600):
+        token = self.validated_data["token"]
+        try:
+            payload = signing.loads(token, salt="password-reset", max_age=max_age_seconds)
+            user_id = payload.get("user_id")
+            email = payload.get("email")
+            if not user_id or not email:
+                raise serializers.ValidationError({"token": "Invalid reset token."})
+            return User.objects.get(user_id=user_id, email=email, is_active=True)
+        except signing.SignatureExpired as exc:
+            raise serializers.ValidationError({"token": "Reset token has expired."}) from exc
+        except (signing.BadSignature, User.DoesNotExist) as exc:
+            raise serializers.ValidationError({"token": "Invalid reset token."}) from exc
+
+
+class RequestEmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        return value.lower().strip()
+
+
+class ConfirmEmailVerificationSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+    def get_user_from_token(self, max_age_seconds=86400):
+        token = self.validated_data["token"]
+        try:
+            payload = signing.loads(token, salt="email-verification", max_age=max_age_seconds)
+            user_id = payload.get("user_id")
+            email = payload.get("email")
+            if not user_id or not email:
+                raise serializers.ValidationError({"token": "Invalid verification token."})
+            return User.objects.get(user_id=user_id, email=email, is_active=True)
+        except signing.SignatureExpired as exc:
+            raise serializers.ValidationError({"token": "Verification token has expired."}) from exc
+        except (signing.BadSignature, User.DoesNotExist) as exc:
+            raise serializers.ValidationError({"token": "Invalid verification token."}) from exc

@@ -18,5 +18,11 @@
         "statusBar.debuggingForeground": "#FDFBFD",
         "statusBar.noFolderBackground": "#411F4F",
         "statusBar.noFolderForeground": "#FDFBFD"
-    }
+    },
+    "cSpell.words": [
+        "digitalfashion",
+        "plpgsql",
+        "psql",
+        "SQLERRM"
+    ]
 }

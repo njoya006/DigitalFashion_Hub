@@ -4,6 +4,7 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import CustomCursor from '@/components/ui/CustomCursor'
+import { CurrencyProvider } from '@/components/providers/CurrencyProvider'
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -46,10 +47,12 @@ export default function RootLayout({
           fontFamily: 'var(--font-dm)',
         }}
       >
-        <CustomCursor />
-        <Navbar />
-        {children}
-        <Footer />
+        <CurrencyProvider>
+          <CustomCursor />
+          <Navbar />
+          {children}
+          <Footer />
+        </CurrencyProvider>
       </body>
     </html>
   )
