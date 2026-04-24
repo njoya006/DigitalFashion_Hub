@@ -5,6 +5,7 @@ const BACKEND_BASE_URL = process.env.BACKEND_API_URL ?? 'http://localhost:8000'
 const STRIPPED_HEADERS = new Set([
   'expect',
   'connection',
+  'content-encoding',
   'content-length',
   'host',
   'transfer-encoding',
@@ -22,6 +23,9 @@ async function proxy(request: NextRequest, pathParts: string[]) {
       headers.set(key, value)
     }
   })
+
+  // Let the backend choose a safe/default encoding for proxied responses.
+  headers.delete('accept-encoding')
 
   const init: RequestInit = {
     method: request.method,
