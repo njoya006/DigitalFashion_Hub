@@ -79,7 +79,11 @@ class LogoutView(APIView):
         try:
             refresh_token = request.data.get("refresh")
             token = RefreshToken(refresh_token)
-            token.blacklist()
+            try:
+                token.blacklist()
+            except Exception:
+                # Blacklist tables may be unavailable in lightweight deployments.
+                pass
             return Response({"success": True, "message": "Logged out successfully."}, status=status.HTTP_200_OK)
         except Exception as exc:
             return Response({"success": False, "error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)

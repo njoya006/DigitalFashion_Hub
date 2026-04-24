@@ -31,7 +31,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not check_password(password, user.password_hash):
             raise serializers.ValidationError({"password": "Incorrect password."})
 
-        refresh = RefreshToken.for_user(user)
+        try:
+            # Preferred path when token blacklist tables are present.
+            refresh = RefreshToken.for_user(user)
+        except Exception:
+            # Fallback for environments where token_blacklist migrations were not applied.
+            refresh = RefreshToken()
+            refresh["user_id"] = str(user.user_id)
         refresh["user_id"] = str(user.user_id)
         refresh["email"] = user.email
         refresh["full_name"] = user.full_name
