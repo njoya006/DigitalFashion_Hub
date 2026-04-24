@@ -108,7 +108,7 @@ export default function HeroSection() {
           <Link href="/products" className="btn-primary">
             Explore Collection →
           </Link>
-          <Link href="/seller" className="btn-ghost">
+          <Link href="/seller-register" className="btn-ghost">
             Become a Seller
           </Link>
         </div>
