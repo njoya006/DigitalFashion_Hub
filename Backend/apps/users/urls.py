@@ -9,6 +9,7 @@ from .views import (
     MeView,
     RefreshTokenView,
     RegisterView,
+    SellerRegisterView,
     RequestEmailVerificationView,
     RequestPasswordResetView,
 )
@@ -16,6 +17,7 @@ from .views import (
 urlpatterns = [
     path("login/", LoginView.as_view(), name="auth-login"),
     path("register/", RegisterView.as_view(), name="auth-register"),
+    path("register/seller/", SellerRegisterView.as_view(), name="auth-seller-register"),
     path("request-verify/", RequestEmailVerificationView.as_view(), name="auth-request-verify"),
     path("confirm-verify/", ConfirmEmailVerificationView.as_view(), name="auth-confirm-verify"),
     path("request-reset/", RequestPasswordResetView.as_view(), name="auth-request-reset"),

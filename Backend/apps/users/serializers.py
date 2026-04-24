@@ -155,6 +155,84 @@ class RegisterSerializer(serializers.Serializer):
         return user
 
 
+class SellerRegisterSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    store_name = serializers.CharField(max_length=150)
+    password = serializers.CharField(min_length=8, write_only=True)
+    confirm_password = serializers.CharField(min_length=8, write_only=True)
+    phone = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    store_description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    store_logo_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    def validate_email(self, value):
+        value = value.lower().strip()
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return value
+
+    def validate_store_name(self, value):
+        value = value.strip()
+        if Seller.objects.filter(store_name__iexact=value).exists():
+            raise serializers.ValidationError("A seller store with this name already exists.")
+        return value
+
+    def validate_phone(self, value):
+        if not value:
+            return ""
+
+        raw = value.strip()
+        normalized = re.sub(r"[^\d+]", "", raw)
+
+        if normalized.startswith("+"):
+            normalized = "+" + normalized[1:].replace("+", "")
+        else:
+            normalized = normalized.replace("+", "")
+
+        if len(normalized) > 20:
+            raise serializers.ValidationError("Phone number is too long. Use at most 20 characters including country code.")
+
+        if normalized and not re.fullmatch(r"\+?\d{7,19}", normalized):
+            raise serializers.ValidationError("Enter a valid phone number.")
+
+        return normalized
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop("confirm_password")
+
+        with transaction.atomic():
+            seller_role, _ = Role.objects.get_or_create(
+                role_name="SELLER",
+                defaults={"description": "Default seller role"},
+            )
+
+            user = User.objects.create(
+                user_id=uuid.uuid4(),
+                email=validated_data["email"],
+                password_hash=hash_password(validated_data["password"]),
+                role=seller_role,
+                full_name=validated_data["full_name"],
+                phone=validated_data.get("phone"),
+                is_verified=False,
+                is_active=True,
+            )
+
+            Seller.objects.create(
+                user=user,
+                store_name=validated_data["store_name"],
+                store_description=validated_data.get("store_description") or None,
+                store_logo_url=validated_data.get("store_logo_url") or None,
+                is_approved=False,
+            )
+
+        return user
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     role_name = serializers.CharField(source="role.role_name", read_only=True)
 
