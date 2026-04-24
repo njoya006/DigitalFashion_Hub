@@ -130,6 +130,8 @@ export default function RegisterPage() {
             placeholder="Phone (optional)"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            inputMode="tel"
+            maxLength={25}
             style={inputStyle}
           />
 
