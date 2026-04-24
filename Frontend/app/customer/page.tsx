@@ -1,7 +1,39 @@
+"use client"
+
 import Link from "next/link"
-import { customerOverview, customerRecentOrders } from "@/lib/portal-data"
+import { useEffect, useState } from "react"
+
+import { fetchMe, type MeProfile } from "@/lib/storefront"
+import { customerRecentOrders } from "@/lib/portal-data"
 
 export default function CustomerDashboardPage() {
+  const [profile, setProfile] = useState<MeProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+
+    fetchMe()
+      .then((data) => {
+        if (!mounted) return
+        setProfile(data)
+      })
+      .catch(() => {
+        if (!mounted) return
+        setProfile(null)
+      })
+      .finally(() => {
+        if (!mounted) return
+        setLoading(false)
+      })
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const customer = profile?.customer_profile
+
   return (
     <main style={{ minHeight: "100vh", padding: "110px 60px 40px", display: "grid", gap: 20 }}>
       <div>
@@ -9,15 +41,15 @@ export default function CustomerDashboardPage() {
           Customer Dashboard
         </p>
         <h1 style={{ fontFamily: "var(--font-cormorant)", fontSize: 46, color: "var(--white)", fontWeight: 400 }}>
-          Welcome back, {customerOverview.name}
+          {loading ? "Loading your account..." : `Welcome back, ${profile?.full_name || profile?.email || "Customer"}`}
         </h1>
       </div>
 
       <section style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 14 }}>
-        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Tier</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customerOverview.tier}</p></article>
-        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Loyalty points</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customerOverview.loyaltyPoints}</p></article>
-        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Lifetime value</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customerOverview.lifetimeValue}</p></article>
-        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Preferred currency</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customerOverview.preferredCurrency}</p></article>
+        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Tier</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.tier_name || "-"}</p></article>
+        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Loyalty points</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.loyalty_points ?? 0}</p></article>
+        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Lifetime value</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.lifetime_value ?? 0}</p></article>
+        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Preferred currency</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.preferred_currency || "USD"}</p></article>
       </section>
 
       <section style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 18 }}>

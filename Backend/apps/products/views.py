@@ -1,9 +1,16 @@
-from django.db import connection
+import json
+from uuid import uuid4
+
+from django.db import connection, transaction
+from django.utils.text import slugify
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from apps.users.models import Seller
+from apps.users.permissions import IsSeller
 
 
 def _parse_bool(value):
@@ -33,6 +40,11 @@ class CategoryListView(APIView):
 
 class ProductListView(APIView):
 	permission_classes = [AllowAny]
+
+	def get_permissions(self):
+		if self.request.method.upper() == "POST":
+			return [IsSeller()]
+		return [AllowAny()]
 
 	@extend_schema(summary="List products", tags=["Products"])
 	def get(self, request):
@@ -120,6 +132,93 @@ class ProductListView(APIView):
 			data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 		return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
+
+	@extend_schema(summary="Create product", tags=["Products"])
+	def post(self, request):
+		payload = request.data
+		product_name = str(payload.get("product_name", "")).strip()
+		base_price = payload.get("base_price")
+		currency_code = str(payload.get("currency_code", "USD")).upper().strip()
+		sku = str(payload.get("sku", "")).strip()
+		category_id = payload.get("category_id")
+		description = payload.get("description")
+		brand = payload.get("brand")
+		is_published = bool(payload.get("is_published", False))
+		is_featured = bool(payload.get("is_featured", False))
+		tags = payload.get("tags")
+		meta_json = payload.get("meta_json")
+		image_url = str(payload.get("image_url", "")).strip()
+		alt_text = str(payload.get("alt_text", "")).strip()
+
+		if not product_name:
+			return Response({"success": False, "error": "product_name is required."}, status=status.HTTP_400_BAD_REQUEST)
+		if base_price in (None, ""):
+			return Response({"success": False, "error": "base_price is required."}, status=status.HTTP_400_BAD_REQUEST)
+		if not sku:
+			sku = f"SKU-{uuid4().hex[:10].upper()}"
+
+		try:
+			base_price_value = float(base_price)
+		except (TypeError, ValueError):
+			return Response({"success": False, "error": "base_price must be numeric."}, status=status.HTTP_400_BAD_REQUEST)
+
+		if not category_id:
+			category_id = None
+
+		seller = Seller.objects.filter(user_id=request.user.user_id).first()
+		if seller is None:
+			seller = Seller.objects.create(
+				user_id=request.user.user_id,
+				store_name=f"{request.user.full_name} Store {str(request.user.user_id)[:8]}",
+			)
+
+		slug_base = slugify(product_name)[:200] or f"product-{uuid4().hex[:8]}"
+		slug = slug_base
+		with connection.cursor() as cursor, transaction.atomic():
+			cursor.execute("SELECT 1 FROM products WHERE slug = %s", [slug])
+			if cursor.fetchone():
+				slug = f"{slug_base}-{uuid4().hex[:8]}"
+
+			cursor.execute(
+				"""
+				INSERT INTO products (
+					seller_id, category_id, currency_code, product_name, slug,
+					description, base_price, sku, brand, is_published, is_featured,
+					tags, meta_json
+				)
+				VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+				RETURNING product_id, seller_id, category_id, currency_code, product_name, slug, description, base_price, sku, brand, is_published, is_featured, tags, meta_json, created_at, updated_at
+				""",
+				[
+					str(seller.seller_id),
+					category_id,
+					currency_code,
+					product_name,
+					slug,
+					description,
+					base_price_value,
+					sku,
+					brand,
+					is_published,
+					is_featured,
+					tags if isinstance(tags, list) else None,
+					json.dumps(meta_json) if meta_json else None,
+				],
+			)
+			row = cursor.fetchone()
+			columns = [col[0] for col in cursor.description]
+			created_product = dict(zip(columns, row))
+
+			if image_url:
+				cursor.execute(
+					"""
+					INSERT INTO product_images (product_id, variant_id, image_url, alt_text, display_order, is_primary)
+					VALUES (%s, NULL, %s, %s, 0, TRUE)
+					""",
+					[str(created_product["product_id"]), image_url, alt_text or product_name],
+				)
+
+		return Response({"success": True, "message": "Product created successfully.", "data": created_product}, status=status.HTTP_201_CREATED)
 
 
 class ProductDetailView(APIView):

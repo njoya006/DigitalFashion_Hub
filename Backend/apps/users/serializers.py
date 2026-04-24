@@ -45,6 +45,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         User.objects.filter(user_id=user.user_id).update(last_login=timezone.now())
 
+        if user.role and user.role.role_name == "SELLER":
+            Seller.objects.get_or_create(
+                user=user,
+                defaults={"store_name": f"{user.full_name} Store {str(user.user_id)[:8]}"},
+            )
+
         return {
             "access": str(refresh.access_token),
             "refresh": str(refresh),

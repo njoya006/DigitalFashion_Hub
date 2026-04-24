@@ -143,6 +143,31 @@ export interface MeProfile {
     tier_name: string
     discount_percentage: string | number
   }
+  seller_profile?: {
+    store_name: string
+    store_logo_url: string | null
+    store_description: string | null
+    commission_rate: string | number
+    is_approved: boolean
+    rating: string | number
+    total_sales: string | number
+  }
+}
+
+export interface CreateProductPayload {
+  product_name: string
+  base_price: number | string
+  currency_code: string
+  sku?: string
+  category_id?: number | string | null
+  description?: string
+  brand?: string
+  is_published?: boolean
+  is_featured?: boolean
+  tags?: string[]
+  meta_json?: Record<string, unknown> | null
+  image_url?: string
+  alt_text?: string
 }
 
 export interface PlaceOrderPayload {
@@ -250,4 +275,8 @@ export async function fetchMe(): Promise<MeProfile> {
 
 export async function placeOrder(payload: PlaceOrderPayload) {
   return api.post<{ success: boolean; data: { order_id?: string; order_number?: string; [key: string]: unknown } }>('/orders/place/', payload)
+}
+
+export async function createProduct(payload: CreateProductPayload) {
+  return api.post<{ success: boolean; message?: string; data: { product_id: string; [key: string]: unknown } }>('/products/', payload)
 }
