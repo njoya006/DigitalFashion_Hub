@@ -1,4 +1,5 @@
 import uuid
+import re
 from django.db import transaction
 from django.core import signing
 from django.utils import timezone
@@ -60,6 +61,28 @@ class RegisterSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("An account with this email already exists.")
         return value
+
+    def validate_phone(self, value):
+        # Accept common formatting, then store as normalized +digits/digits.
+        if not value:
+            return ""
+
+        raw = value.strip()
+        normalized = re.sub(r"[^\d+]", "", raw)
+
+        # Keep only a leading plus sign if present.
+        if normalized.startswith("+"):
+            normalized = "+" + normalized[1:].replace("+", "")
+        else:
+            normalized = normalized.replace("+", "")
+
+        if len(normalized) > 20:
+            raise serializers.ValidationError("Phone number is too long. Use at most 20 characters including country code.")
+
+        if normalized and not re.fullmatch(r"\+?\d{7,19}", normalized):
+            raise serializers.ValidationError("Enter a valid phone number.")
+
+        return normalized
 
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
