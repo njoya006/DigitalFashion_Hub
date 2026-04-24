@@ -94,7 +94,10 @@ class RegisterSerializer(serializers.Serializer):
         preferred_currency = validated_data.pop("preferred_currency", "USD")
 
         with transaction.atomic():
-            customer_role = Role.objects.get(role_name="CUSTOMER")
+            customer_role, _ = Role.objects.get_or_create(
+                role_name="CUSTOMER",
+                defaults={"description": "Default customer role"},
+            )
             user = User.objects.create(
                 user_id=uuid.uuid4(),
                 email=validated_data["email"],
@@ -106,7 +109,16 @@ class RegisterSerializer(serializers.Serializer):
                 is_active=True,
             )
 
-            standard_tier = CustomerTier.objects.get(tier_id=1)
+            standard_tier, _ = CustomerTier.objects.get_or_create(
+                tier_id=1,
+                defaults={
+                    "tier_name": "Standard",
+                    "discount_percentage": 0,
+                    "min_lifetime_value": 0,
+                    "perks": "",
+                    "badge_color": "#9CA3AF",
+                },
+            )
             Customer.objects.create(
                 user=user,
                 tier=standard_tier,
