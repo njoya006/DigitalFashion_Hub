@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.currencies.models import Currency
 from .models import Customer, CustomerTier, Role, Seller, User
 from .utils import check_password, hash_password
 
@@ -91,7 +92,7 @@ class RegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data.pop("confirm_password")
-        preferred_currency = validated_data.pop("preferred_currency", "USD")
+        preferred_currency = validated_data.pop("preferred_currency", "USD").upper().strip()
 
         with transaction.atomic():
             customer_role, _ = Role.objects.get_or_create(
@@ -119,10 +120,22 @@ class RegisterSerializer(serializers.Serializer):
                     "badge_color": "#9CA3AF",
                 },
             )
+
+            currency = Currency.objects.filter(currency_code=preferred_currency).first()
+            if currency is None:
+                currency, _ = Currency.objects.get_or_create(
+                    currency_code="USD",
+                    defaults={
+                        "currency_name": "US Dollar",
+                        "symbol": "$",
+                        "is_active": True,
+                    },
+                )
+
             Customer.objects.create(
                 user=user,
                 tier=standard_tier,
-                preferred_currency=preferred_currency,
+                preferred_currency=currency.currency_code,
                 loyalty_points=0,
                 lifetime_value=0,
             )
