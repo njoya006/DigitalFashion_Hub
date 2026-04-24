@@ -1,5 +1,6 @@
 from pathlib import Path
-from decouple import Csv, config
+from decouple import config
+from csv import reader as csv_reader
 from datetime import timedelta
 try:
     import dj_database_url
@@ -10,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=lambda x: list(csv_reader([x], skipinitialspace=True))[0])
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     # Local apps
+    "apps.core",
     "apps.users",
     "apps.products",
     "apps.orders",
@@ -128,10 +130,10 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000",
-    cast=Csv(),
+    cast=lambda x: list(csv_reader([x], skipinitialspace=True))[0],
 )
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=lambda x: list(csv_reader([x], skipinitialspace=True))[0])
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DigitalFashion Hub API",
