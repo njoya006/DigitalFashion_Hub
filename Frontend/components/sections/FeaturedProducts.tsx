@@ -1,35 +1,26 @@
-'use client'
-// FILE: components/sections/FeaturedProducts.tsx
+"use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+import { fetchProducts, getPrimaryImage, toNumber, type ProductSummary } from '@/lib/storefront'
+import { formatPrice, truncate } from '@/lib/utils'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 
-const products = [
-  { id: 1, name: 'Oversize Wool Coat', seller: 'Maison Élite', price: '$420', originalPrice: '$580', currency: 'USD', badge: 'New Arrival', badgeColor: 'gold', rating: 4.8, reviews: 124, image: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=600&q=80&fit=crop' },
-  { id: 2, name: 'Structured Tote Bag', seller: 'Atelier Noir', price: '€680', currency: 'EUR', badge: 'VIP Pick', badgeColor: 'gold-light', rating: 4.6, reviews: 89, image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80&fit=crop' },
-  { id: 3, name: 'Heritage Sneakers', seller: 'Studio Kenzo', price: '£195', originalPrice: '£240', currency: 'GBP', badge: 'Limited', badgeColor: 'gold', rating: 4.9, reviews: 212, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80&fit=crop' },
-  { id: 4, name: 'Silk Evening Dress', seller: 'Lumière Paris', price: '¥58,000', currency: 'JPY', badge: 'Bestseller', badgeColor: 'gold', rating: 4.7, reviews: 178, image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80&fit=crop' },
-]
-
-function ProductCardItem({ product, delay }: { product: typeof products[0]; delay: number }) {
+function ProductCardItem({ product, delay }: { product: ProductSummary; delay: number }) {
   const ref = useScrollReveal<HTMLDivElement>(0.1, delay)
   const [hovered, setHovered] = useState(false)
   const [wishlisted, setWishlisted] = useState(false)
+  const image = getPrimaryImage(product)
 
   return (
     <div
       ref={ref}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: 'none',
-      }}
+      style={{ display: 'flex', flexDirection: 'column', cursor: 'none' }}
     >
-      {/* Image area */}
       <div
         style={{
           position: 'relative',
@@ -41,7 +32,6 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
           borderRadius: 'var(--radius)',
         }}
       >
-        {/* Product image */}
         <div
           style={{
             position: 'absolute',
@@ -50,16 +40,32 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
             transition: 'transform 0.6s ease',
           }}
         >
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            style={{ objectFit: 'cover', objectPosition: 'top center' }}
-          />
+          {image ? (
+            <Image
+              src={image}
+              alt={product.primary_image_alt_text || product.product_name}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              style={{ objectFit: 'cover', objectPosition: 'top center' }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'var(--muted)',
+                fontSize: 12,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
+              No image
+            </div>
+          )}
         </div>
 
-        {/* Dark overlay on hover */}
         <div
           style={{
             position: 'absolute',
@@ -73,7 +79,8 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
             padding: 20,
           }}
         >
-          <button
+          <Link
+            href={`/products/${product.product_id}`}
             style={{
               width: '100%',
               padding: '12px',
@@ -89,21 +96,22 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
               fontFamily: 'var(--font-dm)',
               transform: hovered ? 'translateY(0)' : 'translateY(10px)',
               transition: 'transform 0.3s ease',
+              textAlign: 'center',
+              textDecoration: 'none',
             }}
           >
-            Quick Add
-          </button>
+            View Product
+          </Link>
         </div>
 
-        {/* Badge */}
         <div
           style={{
             position: 'absolute',
             top: 12,
             left: 12,
             fontSize: 9,
-            color: product.badgeColor === 'gold-light' ? 'var(--gold-light)' : 'var(--gold)',
-            background: product.badgeColor === 'gold-light' ? 'rgba(232,201,122,0.15)' : 'var(--gold-dim)',
+            color: 'var(--gold)',
+            background: 'var(--gold-dim)',
             padding: '3px 10px',
             borderRadius: 'var(--radius)',
             fontFamily: 'var(--font-dm)',
@@ -111,10 +119,9 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
             textTransform: 'uppercase',
           }}
         >
-          {product.badge}
+          {product.is_featured ? 'Featured' : 'New Arrival'}
         </div>
 
-        {/* Wishlist heart */}
         <button
           onClick={() => setWishlisted(!wishlisted)}
           style={{
@@ -140,30 +147,20 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
         </button>
       </div>
 
-      {/* Info */}
       <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
         <p style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'var(--font-dm)', marginBottom: 6 }}>
-          {product.seller}
+          {product.brand || product.seller_name || 'Digital Fashion Hub'}
         </p>
         <p style={{ fontFamily: 'var(--font-cormorant)', fontSize: 18, color: 'var(--white)', marginBottom: 8, lineHeight: 1.2 }}>
-          {product.name}
+          {product.product_name}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: 17, color: 'var(--gold)' }}>{product.price}</span>
-          {product.originalPrice && (
-            <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: 14, color: 'var(--muted)', textDecoration: 'line-through' }}>
-              {product.originalPrice}
-            </span>
-          )}
+          <span style={{ fontFamily: 'var(--font-cormorant)', fontSize: 17, color: 'var(--gold)' }}>{formatPrice(toNumber(product.base_price), product.currency_code)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: 1 }}>
-            {'★'.repeat(Math.round(product.rating))}{'☆'.repeat(5 - Math.round(product.rating))}
-          </span>
-          <span style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'var(--font-dm)' }}>
-            {product.rating} ({product.reviews})
-          </span>
+          <span style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: 1 }}>{product.is_published ? 'Published' : 'Draft'}</span>
         </div>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginTop: 8 }}>{truncate(product.description || 'Curated luxury piece available through the live storefront.', 110)}</p>
       </div>
     </div>
   )
@@ -171,19 +168,35 @@ function ProductCardItem({ product, delay }: { product: typeof products[0]; dela
 
 export default function FeaturedProducts() {
   const headerRef = useScrollReveal(0.1)
+  const [products, setProducts] = useState<ProductSummary[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function load() {
+      try {
+        const data = await fetchProducts({ featured: true, limit: 4 })
+        if (!mounted) return
+        setProducts(data)
+      } catch {
+        if (!mounted) return
+        setProducts([])
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+
+    load()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return (
     <section style={{ padding: '100px 60px', backgroundColor: 'var(--black)' }}>
-      {/* Header */}
-      <div
-        ref={headerRef}
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          marginBottom: 56,
-        }}
-      >
+      <div ref={headerRef} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <span className="gold-line" />
@@ -212,18 +225,20 @@ export default function FeaturedProducts() {
         </Link>
       </div>
 
-      {/* Product grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: 24,
-        }}
-      >
-        {products.map((product, i) => (
-          <ProductCardItem key={product.id} product={product} delay={i * 100} />
-        ))}
-      </div>
+      {loading ? (
+        <div style={{ minHeight: 320, border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.02)' }} />
+      ) : products.length ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
+          {products.map((product, i) => (
+            <ProductCardItem key={product.product_id} product={product} delay={i * 100} />
+          ))}
+        </div>
+      ) : (
+        <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 28, background: 'rgba(255,255,255,0.02)' }}>
+          <h3 style={{ marginBottom: 8 }}>No featured products yet</h3>
+          <p style={{ color: 'var(--muted)' }}>Published products will appear here once sellers mark them as featured.</p>
+        </div>
+      )}
     </section>
   )
 }
