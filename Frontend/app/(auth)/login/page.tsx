@@ -174,6 +174,9 @@ export default function LoginPage() {
           <Link href="/register" style={{ color: "var(--gold)", fontSize: 13 }}>
             Create account
           </Link>
+          <Link href="/seller-register" style={{ color: "var(--muted)", fontSize: 13 }}>
+            Seller signup
+          </Link>
           <Link href="/verify-email" style={{ color: "var(--muted)", fontSize: 13 }}>
             Verify email
           </Link>

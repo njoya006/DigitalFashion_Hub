@@ -19,6 +19,7 @@ from .serializers import (
     RequestEmailVerificationSerializer,
     RequestPasswordResetSerializer,
     RegisterSerializer,
+    SellerRegisterSerializer,
     SellerProfileSerializer,
     UserProfileSerializer,
 )
@@ -56,6 +57,41 @@ class RegisterView(APIView):
                 "user_id": str(user.user_id),
                 "email": user.email,
                 "full_name": user.full_name,
+            },
+        }
+
+        if settings.DEBUG:
+            verification_token = signing.dumps(
+                {"user_id": str(user.user_id), "email": user.email},
+                salt="email-verification",
+            )
+            frontend_base = getattr(settings, "FRONTEND_URL", "http://localhost:3000").rstrip("/")
+            response_data["data"]["verification_token"] = verification_token
+            response_data["data"]["verification_url"] = f"{frontend_base}/verify-email?token={verification_token}"
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+class SellerRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(summary="Register seller", description="Create a new seller account.", tags=["Authentication"])
+    def post(self, request):
+        serializer = SellerRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        seller = Seller.objects.get(user_id=user.user_id)
+
+        response_data = {
+            "success": True,
+            "message": "Seller account created successfully. Please sign in.",
+            "data": {
+                "user_id": str(user.user_id),
+                "email": user.email,
+                "full_name": user.full_name,
+                "role": "SELLER",
+                "seller_profile": SellerProfileSerializer(seller).data,
             },
         }
 

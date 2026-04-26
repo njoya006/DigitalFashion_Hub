@@ -175,6 +175,11 @@ export default function RegisterPage() {
             Already have an account? Sign in
           </Link>
           <div style={{ marginTop: 8 }}>
+            <Link href="/seller-register" style={{ color: "var(--muted)", fontSize: 13 }}>
+              Register as a seller
+            </Link>
+          </div>
+          <div style={{ marginTop: 8 }}>
             <Link href="/verify-email" style={{ color: "var(--muted)", fontSize: 13 }}>
               Verify your email
             </Link>
