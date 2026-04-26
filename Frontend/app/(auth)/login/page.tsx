@@ -72,14 +72,14 @@ export default function LoginPage() {
       })
 
       const nextPath = new URLSearchParams(window.location.search).get("next")
-      if (nextPath && isAllowedNextPath(res.data.role, nextPath)) {
-        router.push(nextPath)
-      } else {
-        router.push(roleDefaultPath(res.data.role))
-      }
+      const redirectPath = nextPath && isAllowedNextPath(res.data.role, nextPath) 
+        ? nextPath 
+        : roleDefaultPath(res.data.role)
+      
+      // Use window.location for reliable redirect
+      window.location.href = redirectPath
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed. Try again.")
-    } finally {
       setLoading(false)
     }
   }

@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { fetchCategories, fetchMe, fetchProducts, createProduct, getPrimaryImage, toNumber, type Category, type MeProfile, type ProductSummary } from '@/lib/storefront'
+import { fetchCategories, fetchMe, fetchProducts, fetchProductSales, createProduct, getPrimaryImage, toNumber, type Category, type MeProfile, type ProductSummary, type ProductSalesSummary } from '@/lib/storefront'
 import { formatPrice, truncate } from '@/lib/utils'
 
 export default function SellerProductsPage() {
   const [profile, setProfile] = useState<MeProfile | null>(null)
   const [products, setProducts] = useState<ProductSummary[]>([])
+  const [productSalesMap, setProductSalesMap] = useState<Record<string, ProductSalesSummary>>({})
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -30,10 +31,22 @@ export default function SellerProductsPage() {
     async function loadProducts() {
       const [me, categoryList] = await Promise.all([fetchMe(), fetchCategories()])
       const data = await fetchProducts({ seller_id: me.user_id, include_unpublished: true, limit: 50 })
+      let sales: ProductSalesSummary[] = []
+      try {
+        sales = await fetchProductSales({ include_unpublished: true, limit: 100 })
+      } catch {
+        sales = []
+      }
       if (!mounted) return
       setProfile(me)
       setCategories(categoryList)
       setProducts(data)
+      setProductSalesMap(
+        sales.reduce((acc, item) => {
+          acc[item.product_id] = item
+          return acc
+        }, {} as Record<string, ProductSalesSummary>),
+      )
       setLoading(false)
     }
 
@@ -76,7 +89,19 @@ export default function SellerProductsPage() {
 
       const me = profile || (await fetchMe())
       const data = await fetchProducts({ seller_id: me.user_id, include_unpublished: true, limit: 50 })
+      let sales: ProductSalesSummary[] = []
+      try {
+        sales = await fetchProductSales({ include_unpublished: true, limit: 100 })
+      } catch {
+        sales = []
+      }
       setProducts(data)
+      setProductSalesMap(
+        sales.reduce((acc, item) => {
+          acc[item.product_id] = item
+          return acc
+        }, {} as Record<string, ProductSalesSummary>),
+      )
       if (!profile) setProfile(me)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create product.')
@@ -131,6 +156,7 @@ export default function SellerProductsPage() {
             {products.map((product) => {
               const image = getPrimaryImage(product)
               const sellerLabel = profile?.full_name || product.seller_name || 'Seller'
+              const sales = productSalesMap[product.product_id]
               return (
                 <article key={product.product_id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
                   <div style={{ aspectRatio: '3 / 4', background: 'rgba(255,255,255,0.03)' }}>
@@ -143,6 +169,13 @@ export default function SellerProductsPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 14 }}>
                       <div style={{ color: 'var(--gold)', fontFamily: 'var(--font-cormorant)', fontSize: 22 }}>{formatPrice(toNumber(product.base_price), product.currency_code)}</div>
                       <span style={{ color: 'var(--muted)', fontSize: 11 }}>{product.is_published ? 'Published' : 'Draft'}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8 }}>
+                      <span style={{ color: 'var(--muted)', fontSize: 11 }}>Sold: {sales?.total_units_sold ?? 0}</span>
+                      <span style={{ color: 'var(--muted)', fontSize: 11 }}>Orders: {sales?.order_count ?? 0}</span>
+                    </div>
+                    <div style={{ marginTop: 6, color: 'var(--muted)', fontSize: 11 }}>
+                      Gross sales: {formatPrice(toNumber(sales?.gross_sales ?? 0), product.currency_code)}
                     </div>
                   </div>
                 </article>

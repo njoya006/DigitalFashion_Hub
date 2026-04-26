@@ -6,9 +6,11 @@ from django.utils.text import slugify
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .serializers import ProductCreateSerializer, ProductSalesQuerySerializer
 from apps.users.models import Seller
 from apps.users.permissions import IsSeller
 
@@ -133,12 +135,15 @@ class ProductListView(APIView):
 
 		return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
 
-	@extend_schema(summary="Create product", tags=["Products"])
+	@extend_schema(summary="Create product", tags=["Products"], request=ProductCreateSerializer)
 	def post(self, request):
-		payload = request.data
-		product_name = str(payload.get("product_name", "")).strip()
-		base_price = payload.get("base_price")
-		currency_code = str(payload.get("currency_code", "USD")).upper().strip()
+		serializer = ProductCreateSerializer(data=request.data)
+		serializer.is_valid(raise_exception=True)
+		payload = serializer.validated_data
+
+		product_name = payload["product_name"].strip()
+		base_price = payload["base_price"]
+		currency_code = payload.get("currency_code", "USD")
 		sku = str(payload.get("sku", "")).strip()
 		category_id = payload.get("category_id")
 		description = payload.get("description")
@@ -150,17 +155,9 @@ class ProductListView(APIView):
 		image_url = str(payload.get("image_url", "")).strip()
 		alt_text = str(payload.get("alt_text", "")).strip()
 
-		if not product_name:
-			return Response({"success": False, "error": "product_name is required."}, status=status.HTTP_400_BAD_REQUEST)
-		if base_price in (None, ""):
-			return Response({"success": False, "error": "base_price is required."}, status=status.HTTP_400_BAD_REQUEST)
 		if not sku:
 			sku = f"SKU-{uuid4().hex[:10].upper()}"
-
-		try:
-			base_price_value = float(base_price)
-		except (TypeError, ValueError):
-			return Response({"success": False, "error": "base_price must be numeric."}, status=status.HTTP_400_BAD_REQUEST)
+		base_price_value = float(base_price)
 
 		if not category_id:
 			category_id = None
@@ -219,6 +216,58 @@ class ProductListView(APIView):
 				)
 
 		return Response({"success": True, "message": "Product created successfully.", "data": created_product}, status=status.HTTP_201_CREATED)
+
+
+class ProductSalesView(APIView):
+	permission_classes = [IsAuthenticated, IsSeller]
+
+	@extend_schema(summary="Seller product sales overview", tags=["Products"])
+	def get(self, request):
+		serializer = ProductSalesQuerySerializer(data=request.query_params)
+		serializer.is_valid(raise_exception=True)
+		payload = serializer.validated_data
+
+		limit = payload.get("limit", 50)
+		offset = payload.get("offset", 0)
+		include_unpublished = payload.get("include_unpublished", True)
+
+		published_clause = "" if include_unpublished else "AND p.is_published = TRUE"
+
+		query = f"""
+			SELECT
+				p.product_id,
+				p.product_name,
+				p.slug,
+				p.currency_code,
+				p.base_price,
+				p.is_published,
+				p.is_featured,
+				pi.image_url AS primary_image_url,
+				COALESCE(SUM(oi.quantity), 0)::int AS total_units_sold,
+				COALESCE(SUM(oi.final_price), 0) AS gross_sales,
+				COUNT(DISTINCT oi.order_id)::int AS order_count
+			FROM products p
+			LEFT JOIN order_items oi ON oi.product_id = p.product_id
+			LEFT JOIN LATERAL (
+				SELECT image_url
+				FROM product_images
+				WHERE product_id = p.product_id
+				ORDER BY COALESCE(is_primary, FALSE) DESC, COALESCE(display_order, 9999), image_id
+				LIMIT 1
+			) pi ON TRUE
+			WHERE p.seller_id = %s
+			{published_clause}
+			GROUP BY p.product_id, p.product_name, p.slug, p.currency_code, p.base_price, p.is_published, p.is_featured, pi.image_url
+			ORDER BY gross_sales DESC, total_units_sold DESC, p.product_name ASC
+			LIMIT %s OFFSET %s
+		"""
+
+		with connection.cursor() as cursor:
+			cursor.execute(query, [str(request.user.user_id), limit, offset])
+			columns = [col[0] for col in cursor.description]
+			data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+		return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
 
 
 class ProductDetailView(APIView):
