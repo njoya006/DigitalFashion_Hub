@@ -15,9 +15,10 @@
 --   9.  Sellers (3)            10.  Customers (4)
 --  11.  Addresses (4)          12.  Products (6)
 --  13.  Product_Attributes     14.  Product_Variants (12)
---  15.  Inventory (~18)        16.  Coupons (4)
---  17.  Sample Orders (3)      18.  Order_Items
---  19.  Reviews (3)            20.  Notifications (3)
+--  15.  Product_Images (12)    16.  Inventory (~18)
+--  17.  Coupons (4)            18.  Sample Orders (3)
+--  19.  Order_Items            20.  Reviews (3)
+--  21.  Notifications (3)
 -- ================================================================
 
 BEGIN;
@@ -346,7 +347,59 @@ INSERT INTO Product_Variants (variant_id, product_id, variant_name, sku, price_m
      '{"toe_shape":"round cap-toe","sole":"leather","construction":"goodyear welt","last":"heritage"}', TRUE);
 
 -- ----------------------------------------------------------------
--- SECTION 15: Inventory (~18 rows, distributed across warehouses)
+-- SECTION 15: Product_Images (12 rows — 2 per product)
+-- ----------------------------------------------------------------
+INSERT INTO Product_Images (product_id, variant_id, image_url, alt_text, display_order, is_primary) VALUES
+    -- Oversize Wool Coat
+    ('aaaaaaaa-0000-0000-0000-000000000001', NULL,
+     'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80&fit=crop',
+     'Maison Elite oversize wool coat primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000001', NULL,
+     'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80&fit=crop',
+     'Maison Elite oversize wool coat detail image', 1, FALSE),
+
+    -- Cashmere Turtleneck
+    ('aaaaaaaa-0000-0000-0000-000000000002', NULL,
+     'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&q=80&fit=crop',
+     'Maison Elite cashmere turtleneck primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000002', NULL,
+     'https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80&fit=crop',
+     'Maison Elite cashmere turtleneck lifestyle image', 1, FALSE),
+
+    -- Silk Evening Dress
+    ('aaaaaaaa-0000-0000-0000-000000000003', NULL,
+     'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&q=80&fit=crop',
+     'Lumiere Paris silk evening dress primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000003', NULL,
+     'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200&q=80&fit=crop',
+     'Lumiere Paris silk evening dress runway image', 1, FALSE),
+
+    -- Structured Tote Bag
+    ('aaaaaaaa-0000-0000-0000-000000000004', NULL,
+     'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=1200&q=80&fit=crop',
+     'Lumiere Paris structured tote bag primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000004', NULL,
+     'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=1200&q=80&fit=crop',
+     'Lumiere Paris structured tote bag side view', 1, FALSE),
+
+    -- Tailored Slim Blazer
+    ('aaaaaaaa-0000-0000-0000-000000000005', NULL,
+     'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=1200&q=80&fit=crop',
+     'Studio Kenzo tailored slim blazer primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000005', NULL,
+     'https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=1200&q=80&fit=crop',
+     'Studio Kenzo tailored slim blazer detail image', 1, FALSE),
+
+    -- Heritage Leather Oxford
+    ('aaaaaaaa-0000-0000-0000-000000000006', NULL,
+     'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&q=80&fit=crop',
+     'Studio Kenzo heritage leather oxford primary image', 0, TRUE),
+    ('aaaaaaaa-0000-0000-0000-000000000006', NULL,
+     'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=1200&q=80&fit=crop',
+     'Studio Kenzo heritage leather oxford top view', 1, FALSE);
+
+-- ----------------------------------------------------------------
+-- SECTION 16: Inventory (~18 rows, distributed across warehouses)
 -- Note: variant bbbbbbbb-...0007 at warehouse 2 has qty=3 (below
 --       threshold=10) to demonstrate trg_inventory_reorder on update.
 -- ----------------------------------------------------------------
@@ -386,7 +439,7 @@ INSERT INTO Inventory (variant_id, warehouse_id, quantity_on_hand, reorder_thres
     ('bbbbbbbb-0000-0000-0000-000000000012', 5, 18, 10, 50, '2026-01-10 08:00:00');
 
 -- ----------------------------------------------------------------
--- SECTION 16: Coupons (4 rows)
+-- SECTION 17: Coupons (4 rows)
 -- ----------------------------------------------------------------
 INSERT INTO Coupons (coupon_id, code, discount_type, discount_value, min_order_value, max_uses, used_count, valid_from, valid_until, is_active) VALUES
     (1, 'WELCOME10', 'PERCENT', 10.00,  50.00, 500, 0, '2026-01-01 00:00:00', '2026-12-31 23:59:59', TRUE),
@@ -395,7 +448,7 @@ INSERT INTO Coupons (coupon_id, code, discount_type, discount_value, min_order_v
     (4, 'EXPIRED',   'PERCENT', 15.00,   0.00,  10, 0, '2025-01-01 00:00:00', '2025-12-31 23:59:59', TRUE);
 
 -- ----------------------------------------------------------------
--- SECTION 17: Sample Orders (3 delivered orders — seeded directly
+-- SECTION 18: Sample Orders (3 delivered orders — seeded directly
 --             to provide valid order_id FK for Reviews)
 -- ----------------------------------------------------------------
 
@@ -445,7 +498,7 @@ VALUES (
 );
 
 -- ----------------------------------------------------------------
--- SECTION 18: Order_Items (1 line per order)
+-- SECTION 19: Order_Items (1 line per order)
 -- ----------------------------------------------------------------
 INSERT INTO Order_Items (order_id, line_number, variant_id, warehouse_id,
                          quantity, unit_price, tier_discount_applied, final_price) VALUES
@@ -465,7 +518,7 @@ INSERT INTO Order_Items (order_id, line_number, variant_id, warehouse_id,
      1, 550.00, 5.00, 522.50);
 
 -- ----------------------------------------------------------------
--- SECTION 19: Reviews (3 approved reviews)
+-- SECTION 20: Reviews (3 approved reviews)
 -- Each review references a unique customer+product+order combination
 -- ----------------------------------------------------------------
 INSERT INTO Reviews (review_id, product_id, customer_id, order_id,
@@ -495,7 +548,7 @@ INSERT INTO Reviews (review_id, product_id, customer_id, order_id,
      TRUE, 15, '2026-01-20 14:00:00');
 
 -- ----------------------------------------------------------------
--- SECTION 20: Notifications (3 sample rows)
+-- SECTION 21: Notifications (3 sample rows)
 -- ----------------------------------------------------------------
 INSERT INTO Notifications (user_id, type, message, is_read, created_at) VALUES
     ('00000000-0000-0000-0000-000000000007',
