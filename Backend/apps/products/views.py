@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import ProductCreateSerializer, ProductSalesQuerySerializer
+from .serializers import ProductCreateSerializer, ProductSalesQuerySerializer, TopOrderedProductsQuerySerializer
 from apps.users.models import Seller
 from apps.users.permissions import IsSeller
 
@@ -264,6 +264,59 @@ class ProductSalesView(APIView):
 
 		with connection.cursor() as cursor:
 			cursor.execute(query, [str(request.user.user_id), limit, offset])
+			columns = [col[0] for col in cursor.description]
+			data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+		return Response({"success": True, "data": data}, status=status.HTTP_200_OK)
+
+
+class TopOrderedProductsView(APIView):
+	permission_classes = [AllowAny]
+
+	@extend_schema(summary="Top ordered products", description="Returns top products ranked by number of distinct orders.", tags=["Products"])
+	def get(self, request):
+		serializer = TopOrderedProductsQuerySerializer(data=request.query_params)
+		serializer.is_valid(raise_exception=True)
+		payload = serializer.validated_data
+
+		limit = payload.get("limit", 10)
+		include_unpublished = payload.get("include_unpublished", False)
+		published_clause = "" if include_unpublished else "AND p.is_published = TRUE"
+
+		query = f"""
+			SELECT
+				p.product_id,
+				p.product_name,
+				p.slug,
+				p.seller_id,
+				u.full_name AS seller_name,
+				p.currency_code,
+				p.base_price,
+				p.is_published,
+				p.is_featured,
+				pi.image_url AS primary_image_url,
+				COALESCE(COUNT(DISTINCT oi.order_id), 0)::int AS order_count,
+				COALESCE(SUM(oi.quantity), 0)::int AS total_units_sold,
+				COALESCE(SUM(oi.final_price), 0) AS gross_sales
+			FROM products p
+			LEFT JOIN users u ON u.user_id = p.seller_id
+			LEFT JOIN order_items oi ON oi.product_id = p.product_id
+			LEFT JOIN LATERAL (
+				SELECT image_url
+				FROM product_images
+				WHERE product_id = p.product_id
+				ORDER BY COALESCE(is_primary, FALSE) DESC, COALESCE(display_order, 9999), image_id
+				LIMIT 1
+			) pi ON TRUE
+			WHERE 1 = 1
+			{published_clause}
+			GROUP BY p.product_id, p.product_name, p.slug, p.seller_id, u.full_name, p.currency_code, p.base_price, p.is_published, p.is_featured, pi.image_url
+			ORDER BY order_count DESC, total_units_sold DESC, gross_sales DESC, p.product_name ASC
+			LIMIT %s
+		"""
+
+		with connection.cursor() as cursor:
+			cursor.execute(query, [limit])
 			columns = [col[0] for col in cursor.description]
 			data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
