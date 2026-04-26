@@ -170,6 +170,20 @@ export interface CreateProductPayload {
   alt_text?: string
 }
 
+export interface ProductSalesSummary {
+  product_id: string
+  product_name: string
+  slug: string
+  currency_code: string
+  base_price: string | number | null
+  is_published: boolean
+  is_featured: boolean
+  primary_image_url: string | null
+  total_units_sold: number
+  gross_sales: string | number
+  order_count: number
+}
+
 export interface PlaceOrderPayload {
   currency_code: string
   shipping_address_id: string
@@ -279,4 +293,9 @@ export async function placeOrder(payload: PlaceOrderPayload) {
 
 export async function createProduct(payload: CreateProductPayload) {
   return api.post<{ success: boolean; message?: string; data: { product_id: string; [key: string]: unknown } }>('/products/', payload)
+}
+
+export async function fetchProductSales(params?: Record<string, string | number | boolean | undefined>): Promise<ProductSalesSummary[]> {
+  const response = await api.get<{ success: boolean; data: ProductSalesSummary[] }>('/products/sales/', toQuery(params))
+  return response.data
 }
