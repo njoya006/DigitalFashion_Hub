@@ -57,6 +57,32 @@ export interface Category {
   display_order: number | null
 }
 
+export interface Address {
+  address_id: number
+  user_id: string
+  street: string
+  city: string
+  state: string | null
+  postal_code: string
+  country: string
+  phone: string | null
+  recipient_name: string
+  is_default: boolean
+  created_at: string
+  updated_at?: string
+}
+
+export interface AddressPayload {
+  street: string
+  city: string
+  state?: string | null
+  postal_code: string
+  country: string
+  phone?: string | null
+  recipient_name: string
+  is_default?: boolean
+}
+
 export interface CartItem {
   variant_id: string
   quantity: number
@@ -254,6 +280,23 @@ export async function fetchProduct(productId: string, includeUnpublished = false
 export async function fetchReviews(params?: Record<string, string | number | boolean | undefined>): Promise<ReviewSummary[]> {
   const response = await api.get<{ success: boolean; data: ReviewSummary[] }>('/reviews/', toQuery(params))
   return response.data
+}
+
+export async function fetchAddresses(): Promise<Address[]> {
+  const response = await api.get<{ success: boolean; data: Address[] }>('/addresses/')
+  return response.data
+}
+
+export async function createAddress(payload: AddressPayload) {
+  return api.post<{ success: boolean; data: Address }>('/addresses/', payload)
+}
+
+export async function updateAddress(addressId: number, payload: AddressPayload) {
+  return api.put<{ success: boolean; data: Address }>(`/addresses/${addressId}/`, payload)
+}
+
+export async function deleteAddress(addressId: number) {
+  return api.del<{ success: boolean; data: unknown }>(`/addresses/${addressId}/`)
 }
 
 export async function fetchCart(): Promise<CartPayload> {

@@ -49,7 +49,13 @@ export default function CustomerDashboardPage() {
         <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Tier</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.tier_name || "-"}</p></article>
         <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Loyalty points</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.loyalty_points ?? 0}</p></article>
         <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Lifetime value</p><p style={{ color: "var(--gold)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.lifetime_value ?? 0}</p></article>
-        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16 }}><p style={{ color: "var(--muted)", fontSize: 11 }}>Preferred currency</p><p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.preferred_currency || "USD"}</p></article>
+        <article style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 16, display: "grid", gap: 10 }}>
+          <div>
+            <p style={{ color: "var(--muted)", fontSize: 11 }}>Preferred currency</p>
+            <p style={{ color: "var(--white)", fontSize: 24, fontFamily: "var(--font-cormorant)" }}>{customer?.preferred_currency || "USD"}</p>
+          </div>
+          <Link href="/customer/addresses" className="btn-ghost" style={{ justifyContent: "center" }}>Manage addresses</Link>
+        </article>
       </section>
 
       <section style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 18 }}>

@@ -1,31 +1,31 @@
--- ================================================================
--- DIGITALFASHION HUB — Seed Data
--- File: database/seeds/004_seed_data.sql
--- ICT 3212: Advanced Database Systems
--- ICT University, Cameroon — 2026
--- ================================================================
--- WARNING: Development seed data only. Never run in production.
--- All passwords are bcrypt hash of "password123"
--- ================================================================
--- Sections:
---   1.  Currencies (12)         2.  Exchange_Rates (22)
---   3.  Roles (3)               4.  Customer_Tiers (3)
---   5.  Warehouses (5)          6.  Categories (14)
---   7.  Attributes (10)         8.  Users (8)
---   9.  Sellers (3)            10.  Customers (4)
---  11.  Addresses (4)          12.  Products (6)
---  13.  Product_Attributes     14.  Product_Variants (12)
---  15.  Product_Images (12)    16.  Inventory (~18)
---  17.  Coupons (4)            18.  Sample Orders (3)
---  19.  Order_Items            20.  Reviews (3)
---  21.  Notifications (3)
--- ================================================================
 
 BEGIN;
 
--- ----------------------------------------------------------------
--- SECTION 1: Currencies (12 rows)
--- ----------------------------------------------------------------
+-- ================================================================
+-- TRUNCATE ALL TABLES (CASCADE to handle foreign keys)
+-- ================================================================
+TRUNCATE TABLE Notifications CASCADE;
+TRUNCATE TABLE Reviews CASCADE;
+TRUNCATE TABLE Order_Items CASCADE;
+TRUNCATE TABLE Orders CASCADE;
+TRUNCATE TABLE Inventory CASCADE;
+TRUNCATE TABLE Product_Images CASCADE;
+TRUNCATE TABLE Product_Variants CASCADE;
+TRUNCATE TABLE Product_Attributes CASCADE;
+TRUNCATE TABLE Products CASCADE;
+TRUNCATE TABLE Addresses CASCADE;
+TRUNCATE TABLE Customers CASCADE;
+TRUNCATE TABLE Sellers CASCADE;
+TRUNCATE TABLE Users CASCADE;
+TRUNCATE TABLE Attributes CASCADE;
+TRUNCATE TABLE Categories CASCADE;
+TRUNCATE TABLE Warehouses CASCADE;
+TRUNCATE TABLE Customer_Tiers CASCADE;
+TRUNCATE TABLE Roles CASCADE;
+TRUNCATE TABLE Exchange_Rates CASCADE;
+TRUNCATE TABLE Coupons CASCADE;
+TRUNCATE TABLE Currencies CASCADE;
+
 INSERT INTO Currencies (currency_code, currency_name, symbol, is_active) VALUES
     ('USD', 'US Dollar',           '$',    TRUE),
     ('EUR', 'Euro',                '€',    TRUE),
@@ -175,14 +175,11 @@ INSERT INTO Customers (customer_id, tier_id, preferred_currency, loyalty_points,
     ('00000000-0000-0000-0000-000000000007', 3, 'GBP', 2400, 2400.00,  '2026-01-05'),
     ('00000000-0000-0000-0000-000000000008', 1, 'XAF',   80,   80.00,  '2026-01-05');
 
--- ----------------------------------------------------------------
--- SECTION 11: Addresses (4 rows — one per customer)
--- ----------------------------------------------------------------
-INSERT INTO Addresses (address_id, user_id, label, street, city, state, postal_code, country, is_default) VALUES
-    (1, '00000000-0000-0000-0000-000000000005', 'Home', '45 Oak Street',        'New York', 'NY',      '10001', 'United States',  TRUE),
-    (2, '00000000-0000-0000-0000-000000000006', 'Home', '12 Rue de Rivoli',     'Paris',    NULL,      '75001', 'France',         TRUE),
-    (3, '00000000-0000-0000-0000-000000000007', 'Home', '8 King''s Road',       'London',   'England', 'SW3 5UZ','United Kingdom', TRUE),
-    (4, '00000000-0000-0000-0000-000000000008', 'Home', '22 Rue des Bamileke',  'Yaoundé',  'Centre',  NULL,    'Cameroon',       TRUE);
+INSERT INTO Addresses (address_id, user_id, street, city, state, postal_code, country, phone, recipient_name, is_default) VALUES
+    (1, '00000000-0000-0000-0000-000000000005', '45 Oak Street',        'New York',    'NY',      '10001',   'United States',  '+1-212-555-0001', 'Alice Johnson',  TRUE),
+    (2, '00000000-0000-0000-0000-000000000006', '12 Rue de Rivoli',     'Paris',       NULL,      '75001',   'France',         '+33-612-345-002', 'Bob Martinez',   TRUE),
+    (3, '00000000-0000-0000-0000-000000000007', '8 King''s Road',       'London',      'England', 'SW3 5UZ', 'United Kingdom', '+44-207-946-003', 'Claire Nguyen',  TRUE),
+    (4, '00000000-0000-0000-0000-000000000008', '22 Rue des Bamileke',  'Yaoundé',     'Centre',  '1900',    'Cameroon',       '+237-690-123-008', 'David Osei',     TRUE);
 
 -- ----------------------------------------------------------------
 -- SECTION 12: Products (6 rows)
