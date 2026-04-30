@@ -70,8 +70,12 @@ export default function CheckoutPage() {
     try {
       const response = await placeOrder({
         currency_code: currencyCode,
-        shipping_address_id: shippingAddressId.trim(),
-        items: cart.items.map((item) => ({ variant_id: item.variant_id, quantity: item.quantity })),
+        shipping_address_id: String(parseInt(shippingAddressId, 10) || 1),
+        items: cart.items.map((item) => ({ 
+          variant_id: item.variant_id, 
+          quantity: item.quantity,
+          warehouse_id: 1
+        })),
         coupon_code: couponCode.trim() || undefined,
         shipping_cost: Number(shippingCost || 0),
         tax_rate: Number(taxRate || 0),
