@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { fetchAddresses, fetchCart, fetchMe, placeOrder, type Address, type CartPayload, type MeProfile } from '@/lib/storefront'
 import { formatPrice } from '@/lib/utils'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const addressParam = searchParams.get('address')
   const [cart, setCart] = useState<CartPayload | null>(null)
   const [me, setMe] = useState<MeProfile | null>(null)
   const [addresses, setAddresses] = useState<Address[]>([])
@@ -36,6 +34,7 @@ export default function CheckoutPage() {
         setMe(meData)
         setAddresses(addressData)
         setCurrencyCode(meData.customer_profile?.preferred_currency || cartData.items[0]?.currency_code || 'USD')
+        const addressParam = new URLSearchParams(window.location.search).get('address')
         const selectedAddress = addressParam
           ? addressData.find((address) => String(address.address_id) === addressParam)
           : undefined
@@ -56,7 +55,7 @@ export default function CheckoutPage() {
     return () => {
       mounted = false
     }
-  }, [addressParam])
+  }, [])
 
   const totals = useMemo(() => {
     const subtotal = Number(cart?.subtotal || 0)
