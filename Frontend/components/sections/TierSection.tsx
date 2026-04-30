@@ -54,6 +54,7 @@ export default function TierSection() {
 
   return (
     <section
+      className="section-shell"
       style={{
         backgroundColor: 'var(--surface)',
         padding: '100px 60px',
@@ -79,7 +80,7 @@ export default function TierSection() {
       </div>
 
       {/* Tier cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 1000, margin: '0 auto' }}>
+      <div className="cards-grid tier-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, maxWidth: 1000, margin: '0 auto' }}>
         {tiers.map((tier, i) => (
           <TierCard key={tier.name} tier={tier} delay={i * 120} />
         ))}

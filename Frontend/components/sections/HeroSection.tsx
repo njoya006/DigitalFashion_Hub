@@ -117,6 +117,7 @@ export default function HeroSection() {
 
         {/* Vertical divider */}
         <div
+          className="hero-divider"
           style={{
             position: 'absolute',
             right: 0,

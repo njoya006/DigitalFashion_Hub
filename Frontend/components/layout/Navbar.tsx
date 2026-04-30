@@ -18,6 +18,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userRole, setUserRole] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   function getAccountPath() {
     if (userRole === 'ADMIN') return '/admin'
@@ -29,6 +30,10 @@ export default function Navbar() {
   function handleLogout() {
     clearAuthSession()
     window.location.href = '/login'
+  }
+
+  function closeMobileMenu() {
+    setMobileMenuOpen(false)
   }
 
   useEffect(() => {
@@ -200,6 +205,60 @@ export default function Navbar() {
             Sign In
           </Link>
         )}
+
+        <button
+          type="button"
+          className="mobile-menu-button"
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((current) => !current)}
+          style={{
+            display: 'none',
+            width: 42,
+            height: 42,
+            border: '1px solid var(--border)',
+            background: 'rgba(255,255,255,0.02)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--white)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <path d="M4 7h16" />
+            <path d="M4 12h16" />
+            <path d="M4 17h16" />
+          </svg>
+        </button>
+      </div>
+
+      <div className={`mobile-menu-panel ${mobileMenuOpen ? 'is-open' : ''}`}>
+        <div className="mobile-menu-panel-inner">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} onClick={closeMobileMenu} className="mobile-menu-link">
+              {link.label}
+            </Link>
+          ))}
+          <Link href="/search" onClick={closeMobileMenu} className="mobile-menu-link">
+            Search
+          </Link>
+          <Link href={getAccountPath()} onClick={closeMobileMenu} className="mobile-menu-link">
+            Account
+          </Link>
+          <Link href="/cart" onClick={closeMobileMenu} className="mobile-menu-link">
+            Cart
+          </Link>
+          {isAuthenticated ? (
+            <button type="button" onClick={handleLogout} className="mobile-menu-link mobile-menu-button-link">
+              Logout
+            </button>
+          ) : (
+            <Link href="/login" onClick={closeMobileMenu} className="mobile-menu-link">
+              Sign In
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   )

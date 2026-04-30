@@ -70,6 +70,7 @@ function FooterColumn({ title, links }: { title: string; links: { href: string; 
 export default function Footer() {
   return (
     <footer
+      className="footer-shell"
       style={{
         backgroundColor: 'var(--surface)',
         borderTop: '1px solid var(--border)',
@@ -78,6 +79,7 @@ export default function Footer() {
     >
       {/* Main grid */}
       <div
+        className="footer-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: '1.4fr 1fr 1fr 1fr',
