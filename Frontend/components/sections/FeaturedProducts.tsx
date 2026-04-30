@@ -195,8 +195,8 @@ export default function FeaturedProducts() {
   }, [])
 
   return (
-    <section style={{ padding: '100px 60px', backgroundColor: 'var(--black)' }}>
-      <div ref={headerRef} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56 }}>
+    <section className="section-shell" style={{ padding: '100px 60px', backgroundColor: 'var(--black)' }}>
+      <div ref={headerRef} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 56 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <span className="gold-line" />
@@ -228,7 +228,7 @@ export default function FeaturedProducts() {
       {loading ? (
         <div style={{ minHeight: 320, border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.02)' }} />
       ) : products.length ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
+        <div className="cards-grid featured-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
           {products.map((product, i) => (
             <ProductCardItem key={product.product_id} product={product} delay={i * 100} />
           ))}

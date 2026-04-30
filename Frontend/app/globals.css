@@ -250,6 +250,10 @@ img {
   border: 1px solid var(--border);
 }
 
+.mobile-menu-panel {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .site-header {
     padding: 18px 24px !important;
@@ -274,6 +278,22 @@ img {
 
   .hero-visual {
     min-height: 420px;
+  }
+
+  .section-shell,
+  .footer-shell {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .cards-grid.featured-grid,
+  .cards-grid.tier-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 32px !important;
   }
 }
 
@@ -315,6 +335,51 @@ img {
     justify-content: flex-end;
   }
 
+  .mobile-menu-button {
+    display: inline-flex !important;
+  }
+
+  .mobile-menu-panel {
+    display: block;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+
+  .mobile-menu-panel.is-open {
+    max-height: 420px;
+    opacity: 1;
+  }
+
+  .mobile-menu-panel-inner {
+    margin-top: 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: rgba(8, 8, 8, 0.98);
+    display: grid;
+    gap: 10px;
+  }
+
+  .mobile-menu-link {
+    display: block;
+    padding: 12px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--white);
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .mobile-menu-button-link {
+    width: 100%;
+  }
+
   .hero-section {
     min-height: auto !important;
   }
@@ -343,9 +408,29 @@ img {
     padding-right: 20px;
   }
 
-  .section-padding {
+  .section-padding,
+  .section-shell,
+  .footer-shell {
     padding-left: 20px;
     padding-right: 20px;
+  }
+
+  .hero-divider {
+    display: none;
+  }
+
+  .cards-grid.featured-grid,
+  .cards-grid.tier-grid,
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .footer-grid {
+    gap: 28px !important;
+  }
+
+  .footer-grid > div:first-child p {
+    max-width: 100% !important;
   }
 }
 
