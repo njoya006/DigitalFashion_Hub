@@ -7,6 +7,7 @@ import Link from 'next/link'
 export default function HeroSection() {
   return (
     <section
+      className="hero-section"
       style={{
         minHeight: '100vh',
         display: 'grid',
@@ -18,6 +19,7 @@ export default function HeroSection() {
     >
       {/* ── LEFT SIDE ────────────────────────────────── */}
       <div
+        className="hero-copy"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -128,6 +130,7 @@ export default function HeroSection() {
 
       {/* ── RIGHT SIDE ───────────────────────────────── */}
       <div
+        className="hero-visual"
         style={{
           position: 'relative',
           display: 'flex',

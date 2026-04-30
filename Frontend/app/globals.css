@@ -41,6 +41,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   cursor: none;
   overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 /* Noise texture overlay — mix-blend-mode keeps it off images */
@@ -247,4 +248,117 @@ img {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);
+}
+
+@media (max-width: 1024px) {
+  .site-header {
+    padding: 18px 24px !important;
+    gap: 16px;
+  }
+
+  .site-nav-links {
+    gap: 20px !important;
+  }
+
+  .site-nav-actions {
+    gap: 14px !important;
+  }
+
+  .hero-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-copy {
+    padding: 120px 24px 48px !important;
+  }
+
+  .hero-visual {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    cursor: auto;
+  }
+
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  body::before {
+    opacity: 0.08;
+  }
+
+  .site-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .site-nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .site-nav-links a {
+    font-size: 10px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .site-nav-actions {
+    margin-left: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .hero-section {
+    min-height: auto !important;
+  }
+
+  .hero-copy {
+    padding: 108px 20px 36px !important;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(38px, 15vw, 58px) !important;
+  }
+
+  .hero-copy p {
+    max-width: 100% !important;
+  }
+
+  .hero-visual {
+    min-height: 320px;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    width: 100%;
+    justify-content: center;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .section-padding {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
