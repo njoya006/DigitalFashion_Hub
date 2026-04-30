@@ -46,6 +46,7 @@ export default function Navbar() {
 
   return (
     <header
+      className="site-header"
       style={{
         position: 'fixed',
         top: 0,
@@ -81,6 +82,7 @@ export default function Navbar() {
 
       {/* Nav Links (desktop) */}
       <nav
+        className="site-nav-links"
         style={{
           display: 'flex',
           gap: 36,
@@ -110,7 +112,7 @@ export default function Navbar() {
       </nav>
 
       {/* Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+      <div className="site-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
         <CurrencySwitcher />
 
         {/* Search icon */}

@@ -8,6 +8,7 @@ export default function CustomCursor() {
   const mousePos = useRef({ x: -100, y: -100 })
   const ringPos = useRef({ x: -100, y: -100 })
   const rafRef = useRef<number>(0)
+  const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 
   const animate = useCallback(() => {
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -69,6 +70,10 @@ export default function CustomCursor() {
       observer.disconnect()
     }
   }, [animate])
+
+  if (isTouchDevice) {
+    return null
+  }
 
   return (
     <>
