@@ -24,3 +24,8 @@ class ProductSalesQuerySerializer(serializers.Serializer):
 	limit = serializers.IntegerField(required=False, min_value=1, max_value=100, default=50)
 	offset = serializers.IntegerField(required=False, min_value=0, default=0)
 	include_unpublished = serializers.BooleanField(required=False, default=True)
+
+
+class TopOrderedProductsQuerySerializer(serializers.Serializer):
+	limit = serializers.IntegerField(required=False, min_value=1, max_value=50, default=10)
+	include_unpublished = serializers.BooleanField(required=False, default=False)
