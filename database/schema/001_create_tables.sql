@@ -115,16 +115,21 @@ CREATE TABLE Sellers (
 
 -- Shipping and billing addresses associated with a user account
 CREATE TABLE Addresses (
-    address_id  SERIAL       PRIMARY KEY,
-    user_id     UUID         NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
-    label       VARCHAR(30)  DEFAULT 'Home',  -- 'Home', 'Office', 'Other'
-    street      VARCHAR(200) NOT NULL,
-    city        VARCHAR(100) NOT NULL,
-    state       VARCHAR(100),
-    postal_code VARCHAR(20),
-    country     VARCHAR(100) NOT NULL,
-    is_default  BOOLEAN      DEFAULT FALSE
+    address_id    SERIAL       PRIMARY KEY,
+    user_id       UUID         NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
+    street        VARCHAR(255) NOT NULL,
+    city          VARCHAR(100) NOT NULL,
+    state         VARCHAR(100),
+    postal_code   VARCHAR(20)  NOT NULL,
+    country       VARCHAR(100) NOT NULL,
+    phone         VARCHAR(20),
+    recipient_name VARCHAR(150) NOT NULL,
+    is_default    BOOLEAN      DEFAULT FALSE,
+    created_at    TIMESTAMP    DEFAULT NOW(),
+    updated_at    TIMESTAMP    DEFAULT NOW()
 );
+
+CREATE INDEX idx_addresses_user_id ON Addresses(user_id);
 
 -- ================================================================
 -- SECTION 8: Categories
