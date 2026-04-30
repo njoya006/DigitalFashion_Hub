@@ -164,6 +164,7 @@ class SellerRegisterSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=50, required=False, allow_blank=True)
     store_description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     store_logo_url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    store_logo_file = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     def validate_email(self, value):
         value = value.lower().strip()
@@ -204,6 +205,12 @@ class SellerRegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data.pop("confirm_password")
+        store_logo_file = validated_data.pop("store_logo_file", "").strip()
+        store_logo_url = validated_data.get("store_logo_url", "").strip()
+        
+        # Use store_logo_file if provided (base64 encoded), otherwise use store_logo_url
+        if store_logo_file and store_logo_file.startswith('data:image/'):
+            store_logo_url = store_logo_file
 
         with transaction.atomic():
             seller_role, _ = Role.objects.get_or_create(
@@ -226,7 +233,7 @@ class SellerRegisterSerializer(serializers.Serializer):
                 user=user,
                 store_name=validated_data["store_name"],
                 store_description=validated_data.get("store_description") or None,
-                store_logo_url=validated_data.get("store_logo_url") or None,
+                store_logo_url=store_logo_url or None,
                 is_approved=False,
             )
 

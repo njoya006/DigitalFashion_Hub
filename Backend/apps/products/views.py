@@ -152,8 +152,13 @@ class ProductListView(APIView):
 		is_featured = bool(payload.get("is_featured", False))
 		tags = payload.get("tags")
 		meta_json = payload.get("meta_json")
+		image_file = str(payload.get("image_file", "")).strip()
 		image_url = str(payload.get("image_url", "")).strip()
 		alt_text = str(payload.get("alt_text", "")).strip()
+		
+		# Use image_file if provided (base64 encoded), otherwise use image_url
+		if image_file and image_file.startswith('data:image/'):
+			image_url = image_file
 
 		if not sku:
 			sku = f"SKU-{uuid4().hex[:10].upper()}"

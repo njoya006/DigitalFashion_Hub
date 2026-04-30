@@ -45,12 +45,26 @@ export default function SellerRegisterPage() {
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [storeDescription, setStoreDescription] = useState("")
-  const [storeLogoUrl, setStoreLogoUrl] = useState("")
+  const [storeLogoFile, setStoreLogoFile] = useState("")
+  const [storeLogoPreview, setStoreLogoPreview] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string
+      setStoreLogoFile(base64)
+      setStoreLogoPreview(base64)
+    }
+    reader.readAsDataURL(file)
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -70,7 +84,7 @@ export default function SellerRegisterPage() {
         email: email.trim().toLowerCase(),
         phone: phone.trim(),
         store_description: storeDescription.trim(),
-        store_logo_url: storeLogoUrl.trim(),
+        store_logo_file: storeLogoFile || undefined,
         password,
         confirm_password: confirmPassword,
       })
@@ -169,13 +183,20 @@ export default function SellerRegisterPage() {
             style={inputStyle}
           />
 
-          <input
-            type="url"
-            placeholder="Store Logo URL (optional)"
-            value={storeLogoUrl}
-            onChange={(e) => setStoreLogoUrl(e.target.value)}
-            style={inputStyle}
-          />
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              style={inputStyle}
+            />
+            {storeLogoPreview && (
+              <div style={{ marginTop: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+                <img src={storeLogoPreview} alt="logo preview" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 'var(--radius)' }} />
+                <span style={{ color: 'var(--muted)', fontSize: 12 }}>Logo selected</span>
+              </div>
+            )}
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <input

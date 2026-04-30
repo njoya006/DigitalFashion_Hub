@@ -21,9 +21,23 @@ export default function SellerProductsPage() {
   const [categoryId, setCategoryId] = useState('')
   const [description, setDescription] = useState('')
   const [brand, setBrand] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+  const [imageFile, setImageFile] = useState<string>('')
+  const [imagePreview, setImagePreview] = useState<string>('')
   const [isPublished, setIsPublished] = useState(false)
   const [isFeatured, setIsFeatured] = useState(false)
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string
+      setImageFile(base64)
+      setImagePreview(base64)
+    }
+    reader.readAsDataURL(file)
+  }
 
   useEffect(() => {
     let mounted = true
@@ -74,7 +88,7 @@ export default function SellerProductsPage() {
         brand: brand.trim() || undefined,
         is_published: isPublished,
         is_featured: isFeatured,
-        image_url: imageUrl.trim() || undefined,
+        image_file: imageFile || undefined,
       })
 
       setSuccess(response.message || 'Product created successfully.')
@@ -83,7 +97,8 @@ export default function SellerProductsPage() {
       setBasePrice('')
       setDescription('')
       setBrand('')
-      setImageUrl('')
+      setImageFile('')
+      setImagePreview('')
       setIsPublished(false)
       setIsFeatured(false)
 
@@ -137,8 +152,14 @@ export default function SellerProductsPage() {
               ))}
             </select>
             <input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Brand (optional)" style={{ padding: 12, border: '1px solid var(--border)', background: 'transparent', color: 'var(--white)' }} />
-            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Primary image URL (optional)" style={{ padding: 12, border: '1px solid var(--border)', background: 'transparent', color: 'var(--white)' }} />
+            <input type="file" accept="image/*" onChange={handleImageChange} style={{ padding: 12, border: '1px solid var(--border)', background: 'transparent', color: 'var(--white)' }} />
           </div>
+          {imagePreview && (
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <img src={imagePreview} alt="preview" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius)' }} />
+              <span style={{ color: 'var(--muted)', fontSize: 13 }}>Image selected</span>
+            </div>
+          )}
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (optional)" rows={4} style={{ padding: 12, border: '1px solid var(--border)', background: 'transparent', color: 'var(--white)', resize: 'vertical' }} />
           <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center' }}>
             <label style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--muted)' }}><input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} /> Publish now</label>

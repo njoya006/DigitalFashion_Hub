@@ -1,3 +1,5 @@
+import base64
+import hashlib
 from rest_framework import serializers
 
 
@@ -14,10 +16,18 @@ class ProductCreateSerializer(serializers.Serializer):
 	tags = serializers.ListField(child=serializers.CharField(max_length=40), required=False, allow_empty=True)
 	meta_json = serializers.JSONField(required=False, allow_null=True)
 	image_url = serializers.URLField(required=False, allow_blank=True)
+	image_file = serializers.CharField(required=False, allow_blank=True, write_only=True)
 	alt_text = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
 	def validate_currency_code(self, value):
 		return value.upper().strip()
+
+	def validate_image_file(self, value):
+		if not value:
+			return value
+		if not value.startswith('data:image/'):
+			raise serializers.ValidationError("Image file must be a valid base64-encoded image.")
+		return value
 
 
 class ProductSalesQuerySerializer(serializers.Serializer):

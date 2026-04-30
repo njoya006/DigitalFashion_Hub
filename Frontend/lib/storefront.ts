@@ -167,6 +167,7 @@ export interface CreateProductPayload {
   tags?: string[]
   meta_json?: Record<string, unknown> | null
   image_url?: string
+  image_file?: string
   alt_text?: string
 }
 

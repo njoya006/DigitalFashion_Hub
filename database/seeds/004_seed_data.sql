@@ -41,31 +41,31 @@ INSERT INTO Currencies (currency_code, currency_name, symbol, is_active) VALUES
     ('MAD', 'Moroccan Dirham',     'MAD',  TRUE);
 
 -- ----------------------------------------------------------------
--- SECTION 2: Exchange_Rates (22 rows — effective 2026-01-15)
+-- SECTION 2: Exchange_Rates (22 rows — effective 2026-04-30)
 -- ----------------------------------------------------------------
 INSERT INTO Exchange_Rates (from_currency, to_currency, rate, effective_date, source) VALUES
-    ('USD', 'EUR',   0.921800,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'GBP',   0.789400,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'JPY', 149.420000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'XAF', 605.320000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'CAD',   1.361200,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'AUD',   1.532000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'CHF',   0.883100,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'CNY',   7.241000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'NGN', 1580.000000,  '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'ZAR',  18.640000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('USD', 'MAD',   9.980000,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('EUR', 'USD',   1.084900,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('GBP', 'USD',   1.266600,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('JPY', 'USD',   0.006693,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('XAF', 'USD',   0.001652,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('CAD', 'USD',   0.734600,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('AUD', 'USD',   0.652800,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('CHF', 'USD',   1.132400,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('CNY', 'USD',   0.138100,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('NGN', 'USD',   0.000633,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('ZAR', 'USD',   0.053600,   '2026-01-15 00:00:00', 'OpenExchangeRates'),
-    ('MAD', 'USD',   0.100200,   '2026-01-15 00:00:00', 'OpenExchangeRates');
+    ('USD', 'EUR',   0.923000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'GBP',   0.789000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'JPY', 150.850000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'XAF', 650.000000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'CAD',   1.368000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'AUD',   1.535000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'CHF',   0.885000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'CNY',   7.265000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'NGN', 1650.000000,  '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'ZAR',  18.980000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('USD', 'MAD',  10.150000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('EUR', 'USD',   1.084300,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('GBP', 'USD',   1.268000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('JPY', 'USD',   0.006630,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('XAF', 'USD',   0.001538,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('CAD', 'USD',   0.731000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('AUD', 'USD',   0.651000,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('CHF', 'USD',   1.130800,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('CNY', 'USD',   0.137700,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('NGN', 'USD',   0.000606,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('ZAR', 'USD',   0.052680,   '2026-04-30 00:00:00', 'RealTimeExchangeRates'),
+    ('MAD', 'USD',   0.098500,   '2026-04-30 00:00:00', 'RealTimeExchangeRates');
 
 -- ----------------------------------------------------------------
 -- SECTION 3: Roles (3 rows)

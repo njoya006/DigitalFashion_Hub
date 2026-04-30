@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 class PlaceOrderItemSerializer(serializers.Serializer):
     variant_id = serializers.UUIDField()
-    warehouse_id = serializers.IntegerField(min_value=1)
+    warehouse_id = serializers.IntegerField(min_value=1, required=False, default=1)
     quantity = serializers.IntegerField(min_value=1)
 
 
