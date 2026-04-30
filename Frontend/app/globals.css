@@ -339,6 +339,15 @@ img {
     display: inline-flex !important;
   }
 
+  /* Hide desktop nav elements on narrow screens; keep only the mobile menu button */
+  .site-nav-links {
+    display: none !important;
+  }
+
+  .site-nav-actions > :not(.mobile-menu-button) {
+    display: none !important;
+  }
+
   .mobile-menu-panel {
     display: block;
     width: 100%;
